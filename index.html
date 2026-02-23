@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Talk Clash Debate</title>
+    <!-- Telegram WebApp uchun asosiy skript (buni o'zgartirmang) -->
+    <script src="https://telegram.org"></script>
+    <style>
+        body { 
+            background-color: #1c252e; 
+            color: white; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container { width: 100%; max-width: 400px; text-align: center; }
+        
+        .status-card { 
+            background: #242f3d; 
+            padding: 30px 20px; 
+            border-radius: 20px; 
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        h2 { margin: 0 0 10px 0; color: #ffffff; font-size: 24px; }
+        #status-text { color: #aeb7be; font-size: 16px; margin-bottom: 15px; }
+
+        .timer { 
+            font-size: 48px; 
+            color: #40a7e3; 
+            font-weight: 800; 
+            margin: 10px 0;
+            letter-spacing: 2px;
+        }
+        
+        .btn { 
+            background-color: #40a7e3; 
+            color: white; 
+            border: none; 
+            padding: 18px; 
+            border-radius: 12px; 
+            font-size: 18px; 
+            cursor: pointer; 
+            width: 100%; 
+            font-weight: bold;
+            transition: transform 0.1s, background-color 0.2s;
+            box-shadow: 0 4px 10px rgba(64, 167, 227, 0.3);
+        }
+        
+        .btn:active { transform: scale(0.98); background-color: #3596cc; }
+
+        .best-speaker { 
+            background: #2b3745; 
+            border-left: 4px solid #ffcc00; 
+            padding: 15px; 
+            margin-top: 30px; 
+            text-align: left;
+            border-radius: 8px;
+        }
+        
+        .best-speaker strong { display: block; margin-bottom: 5px; color: #ffcc00; }
+        #awards-list { margin: 0; font-size: 14px; color: #d1d1d1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="status-card">
+            <h2>Debat Practice</h2>
+            <p id="status-text">Tayyormisiz? Raqib qidirishni boshlang.</p>
+            <div id="timer-display" class="timer">02:00</div>
+        </div>
+        
+        <button id="main-btn" class="btn" onclick="startSearch()">Start Conversation</button>
+
+        <div id="achievements" class="best-speaker">
+            <strong>🏆 Mening unvonlarim:</strong>
+            <p id="awards-list">Hozircha yutuqlar yo'q</p>
+        </div>
+    </div>
+
+    <script>
+        // Telegram WebApp obyektini yuklaymiz
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // Ilovani to'liq ekranga yoyish
+        
+        // Ilova ranglarini Telegram ranglariga moslash (ixtiyoriy)
+        tg.ready();
+
+        function startSearch() {
+            // Vizual o'zgarishlar
+            const btn = document.getElementById('main-btn');
+            const status = document.getElementById('status-text');
+            
+            status.innerText = "Raqib qidirilmoqda...";
+            status.style.color = "#40a7e3";
+            btn.innerText = "Navbatda turibsiz...";
+            btn.disabled = true;
+            btn.style.opacity = "0.7";
+
+            // BOTGA MA'LUMOT YUBORISH
+            // Bu ma'lumot main.py dagi F.web_app_data ga boradi
+            tg.sendData("start_search");
+            
+            // Tugma bosilgach ilovani yopish (foydalanuvchi chatga qaytishi uchun)
+            setTimeout(() => {
+                tg.close();
+            }, 500);
+        }
+    </script>
+</body>
+</html>
