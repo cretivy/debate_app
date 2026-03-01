@@ -4,124 +4,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Talk Clash Debate</title>
-    <!-- Telegram WebApp uchun asosiy skript -->
+    <title>Talk Clash - Premium Debate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #40a7e3;
+            --accent: #ffcc00;
+            --danger: #ff4b5c;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --glass: rgba(255, 255, 255, 0.05);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
-            background-color: #1c252e;
-            color: white;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at top right, rgba(64, 167, 227, 0.15), transparent),
+                radial-gradient(circle at bottom left, rgba(255, 204, 0, 0.05), transparent);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             padding: 20px;
-            box-sizing: border-box;
+            overflow: hidden;
         }
 
         .container {
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            z-index: 10;
+        }
+
+        .header {
             text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            color: var(--text-dim);
+            margin: 5px 0 0;
+            font-size: 14px;
         }
 
         .status-card {
-            background: #242f3d;
-            padding: 30px 20px;
-            border-radius: 20px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass);
+            padding: 40px 20px;
+            border-radius: 32px;
             margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        h2 {
-            margin: 0 0 10px 0;
-            color: #ffffff;
-            font-size: 24px;
+        .status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
         }
 
         #status-text {
-            color: #aeb7be;
+            color: var(--text-dim);
             font-size: 16px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            font-weight: 400;
         }
 
         .timer {
-            font-size: 48px;
-            color: #40a7e3;
+            font-size: 64px;
+            color: var(--text);
             font-weight: 800;
             margin: 10px 0;
-            letter-spacing: 2px;
+            letter-spacing: -2px;
+            text-shadow: 0 0 20px rgba(64, 167, 227, 0.3);
+        }
+
+        .live-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--danger);
+            margin-top: 10px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease;
+        }
+
+        .live-status.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--danger);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--danger);
+            animation: pulse 1.5s infinite;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
         }
 
         .btn {
-            background-color: #40a7e3;
+            background: linear-gradient(135deg, var(--primary) 0%, #2563eb 100%);
             color: white;
             border: none;
-            padding: 18px;
-            border-radius: 12px;
+            padding: 20px;
+            border-radius: 20px;
             font-size: 18px;
             cursor: pointer;
             width: 100%;
-            font-weight: bold;
-            transition: transform 0.1s, background-color 0.2s;
-            box-shadow: 0 4px 10px rgba(64, 167, 227, 0.3);
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .btn:active {
-            transform: scale(0.98);
-            background-color: #3596cc;
+            transform: scale(0.96);
+            filter: brightness(1.1);
+        }
+
+        .btn:disabled {
+            background: var(--card-bg);
+            color: var(--text-dim);
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .btn.secondary {
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text);
         }
 
         .btn.danger {
-            background-color: #e53935;
-            box-shadow: 0 4px 10px rgba(229, 57, 53, 0.3);
+            background: linear-gradient(135deg, var(--danger) 0%, #b91c1c 100%);
+            box-shadow: 0 10px 25px rgba(229, 62, 62, 0.2);
         }
 
-        .best-speaker {
-            background: #2b3745;
-            border-left: 4px solid #ffcc00;
-            padding: 15px;
-            margin-top: 30px;
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 5px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s ease;
+        }
+
+        .controls.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .visualizer {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin: 20px 0;
+        }
+
+        .bar {
+            width: 4px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: height 0.1s ease;
+        }
+
+        .achievements-card {
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: auto;
             text-align: left;
-            border-radius: 8px;
         }
 
-        .best-speaker strong {
-            display: block;
-            margin-bottom: 5px;
-            color: #ffcc00;
+        .achievements-card h3 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         #awards-list {
             margin: 0;
-            font-size: 14px;
-            color: #d1d1d1;
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.6;
         }
 
-        .live-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background-color: #e53935;
-            border-radius: 50%;
-            margin-right: 8px;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
+        @keyframes pulse {
             0% {
+                transform: scale(1);
                 opacity: 1;
             }
 
             50% {
-                opacity: 0.3;
+                transform: scale(1.5);
+                opacity: 0.5;
             }
 
             100% {
+                transform: scale(1);
                 opacity: 1;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
             }
         }
 
@@ -133,26 +297,50 @@
 
 <body>
     <div class="container">
+        <div class="header">
+            <h1>Talk Clash</h1>
+            <p>Premium Real-time Debate</p>
+        </div>
+
         <div class="status-card">
-            <h2 id="title">Debat Practice</h2>
             <p id="status-text">Tayyormisiz? Raqib qidirishni boshlang.</p>
-            <div id="connection-status" style="display:none; font-size: 14px; margin-bottom: 10px;">
-                <span class="live-indicator"></span> LIVE AUDIO
+            <div id="connection-status" class="live-status">
+                <span class="live-dot"></span> LIVE AUDIO
             </div>
+
+            <div class="visualizer" id="visualizer">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+
             <div id="timer-display" class="timer">02:00</div>
         </div>
 
-        <button id="main-btn" class="btn" onclick="startSearch()">Start Conversation</button>
-        <button id="end-btn" class="btn danger" style="display:none; margin-top: 10px;" onclick="location.reload()">End
-            Debate</button>
+        <div class="btn-group">
+            <button id="main-btn" class="btn" onclick="startSearch()">
+                <span>🚀</span> Start Conversation
+            </button>
 
-        <audio id="remote-audio" autoplay></audio>
+            <div class="controls" id="controls">
+                <button id="mute-btn" class="btn secondary" onclick="toggleMute()">
+                    <span id="mute-icon">🎤</span> <span id="mute-text">Mute</span>
+                </button>
+                <button id="end-btn" class="btn danger" onclick="location.reload()">
+                    <span>🛑</span> End
+                </button>
+            </div>
+        </div>
 
-        <div id="achievements" class="best-speaker">
-            <strong>🏆 Mening unvonlarim:</strong>
-            <p id="awards-list">Hozircha yutuqlar yo'q</p>
+        <div class="achievements-card">
+            <h3>🏆 Mening unvonlarim</h3>
+            <p id="awards-list">Hozircha yutuqlar yo'q. Debatda qatnashing va g'olib bo'ling!</p>
         </div>
     </div>
+
+    <audio id="remote-audio" autoplay playsinline></audio>
 
     <script>
         let tg = window.Telegram.WebApp;
@@ -165,12 +353,18 @@
 
         const statusText = document.getElementById('status-text');
         const mainBtn = document.getElementById('main-btn');
-        const endBtn = document.getElementById('end-btn');
+        const controls = document.getElementById('controls');
         const connStatus = document.getElementById('connection-status');
         const remoteAudio = document.getElementById('remote-audio');
+        const muteBtn = document.getElementById('mute-btn');
+        const muteIcon = document.getElementById('mute-icon');
+        const muteText = document.getElementById('mute-text');
+        const bars = document.querySelectorAll('.bar');
 
         let peer = null;
         let localStream = null;
+        let isMuted = false;
+        let audioContext, analyser, dataArray;
 
         if (matchId && role) {
             initLiveDebate();
@@ -178,100 +372,130 @@
 
         async function initLiveDebate() {
             mainBtn.style.display = 'none';
-            endBtn.style.display = 'block';
-            statusText.innerText = `Matched as Team ${role}. Requesting microphone...`;
+            controls.classList.add('active');
+            statusText.innerText = "Ruxsat kutilmoqda...";
 
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                statusText.innerText = "Microphone OK. Connecting to peer...";
+                // ECHO CANCELLATION va NOISE SUPPRESSION sozlanmalari
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true,
+                        sampleRate: 48000
+                    }
+                });
+
+                statusText.innerText = "Bog'lanish kutilmoqda...";
+                setupVisualizer(localStream);
                 setupPeer();
             } catch (err) {
                 console.error(err);
-                statusText.innerText = "Error: Microphone access denied. Please enable it in Telegram settings and refresh.";
-                statusText.style.color = "#e53935";
+                statusText.innerText = "Xatolik: Mikrofon rad etildi.";
+                statusText.style.color = "var(--danger)";
             }
         }
 
         function setupPeer() {
             const peerId = `debate_${matchId}_${role}`;
-            peer = new Peer(peerId);
+            peer = new Peer(peerId, {
+                debug: 1
+            });
 
             peer.on('open', (id) => {
-                console.log('My peer ID is: ' + id);
                 if (role === 'B') {
                     tryCall(0);
                 }
             });
 
             peer.on('call', (call) => {
-                console.log("Receiving call...");
                 call.answer(localStream);
                 handleCall(call);
             });
 
             peer.on('error', (err) => {
-                console.error("Peer Error:", err.type);
                 if (err.type === 'peer-unavailable' && role === 'B') {
                     statusText.innerText = "Raqib hali ulanmadi. Qayta urinilmoqda...";
                 } else {
-                    statusText.innerText = "Connection error: " + err.type;
+                    statusText.innerText = "Ulanish xatosi: " + err.type;
                 }
             });
         }
 
         function tryCall(attempt) {
-            if (attempt > 10) {
-                statusText.innerText = "Raqib topilmadi. Iltimos ikkala telefonda ham Microphoneni yoqib, qayta kiring.";
+            if (attempt > 15) {
+                statusText.innerText = "Raqib topilmadi. Qayta urinib ko'ring.";
                 return;
             }
 
-            console.log(`Attempting to call Role A (Attempt ${attempt})...`);
             const call = peer.call(`debate_${matchId}_A`, localStream);
-
             if (call) {
                 handleCall(call);
-                // Watch for connection
                 setTimeout(() => {
-                    if (statusText.innerText.includes("Connecting") || statusText.innerText.includes("hali ulanmadi")) {
+                    if (!connStatus.classList.contains('active')) {
                         tryCall(attempt + 1);
                     }
-                }, 5000);
+                }, 4000);
             }
         }
 
         function handleCall(call) {
             call.on('stream', (stream) => {
-                console.log("Logged remote stream");
                 remoteAudio.srcObject = stream;
                 remoteAudio.play().then(() => {
-                    statusText.innerText = "Connected! Start talking.";
-                    connStatus.style.display = 'block';
-                    console.log("Audio playing correctly.");
+                    statusText.innerText = "Suhbat faol. Gapiring!";
+                    connStatus.classList.add('active');
                 }).catch(err => {
-                    statusText.innerText = "Audio play blocked. Click here to listen.";
-                    console.log("Audio play failed:", err);
+                    statusText.innerText = "Audio ruxsatini bosing.";
                     document.body.onclick = () => remoteAudio.play();
                 });
             });
 
             call.on('close', () => {
-                statusText.innerText = "Debate ended.";
-                connStatus.style.display = 'none';
+                statusText.innerText = "Debat yakunlandi.";
+                connStatus.classList.remove('active');
             });
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            localStream.getAudioTracks()[0].enabled = !isMuted;
+            muteBtn.classList.toggle('secondary');
+            if (isMuted) {
+                muteIcon.innerText = "🔇";
+                muteText.innerText = "Unmute";
+            } else {
+                muteIcon.innerText = "🎤";
+                muteText.innerText = "Mute";
+            }
+        }
+
+        function setupVisualizer(stream) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            const source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyser);
+            analyser.fftSize = 32;
+            const bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+
+            function update() {
+                analyser.getByteFrequencyData(dataArray);
+                bars.forEach((bar, i) => {
+                    const height = (dataArray[i] / 255) * 40;
+                    bar.style.height = `${Math.max(4, height)}px`;
+                });
+                requestAnimationFrame(update);
+            }
+            update();
         }
 
         function startSearch() {
             statusText.innerText = "Raqib qidirilmoqda...";
-            statusText.style.color = "#40a7e3";
-            mainBtn.innerText = "Navbatda turibsiz...";
+            mainBtn.innerText = "Navbatda...";
             mainBtn.disabled = true;
-            mainBtn.style.opacity = "0.7";
-
             tg.sendData("start_search");
-
-            setTimeout(() => {
-                tg.close();
-            }, 500);
+            setTimeout(() => tg.close(), 500);
         }
     </script>
 </body>
