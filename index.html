@@ -1,74 +1,105 @@
 <!DOCTYPE html>
 <html lang="uz">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Talk Clash Debate</title>
-    <!-- Telegram WebApp uchun asosiy skript (buni o'zgartirmang) -->
-    <script src="https://telegram.org"></script>
+    <!-- Telegram WebApp uchun asosiy skript -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <style>
-        body { 
-            background-color: #1c252e; 
-            color: white; 
+        body {
+            background-color: #1c252e;
+            color: white;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            height: 100vh; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
         }
-        .container { width: 100%; max-width: 400px; text-align: center; }
-        
-        .status-card { 
-            background: #242f3d; 
-            padding: 30px 20px; 
-            border-radius: 20px; 
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        
-        h2 { margin: 0 0 10px 0; color: #ffffff; font-size: 24px; }
-        #status-text { color: #aeb7be; font-size: 16px; margin-bottom: 15px; }
 
-        .timer { 
-            font-size: 48px; 
-            color: #40a7e3; 
-            font-weight: 800; 
+        .container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .status-card {
+            background: #242f3d;
+            padding: 30px 20px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            margin: 0 0 10px 0;
+            color: #ffffff;
+            font-size: 24px;
+        }
+
+        #status-text {
+            color: #aeb7be;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .timer {
+            font-size: 48px;
+            color: #40a7e3;
+            font-weight: 800;
             margin: 10px 0;
             letter-spacing: 2px;
         }
-        
-        .btn { 
-            background-color: #40a7e3; 
-            color: white; 
-            border: none; 
-            padding: 18px; 
-            border-radius: 12px; 
-            font-size: 18px; 
-            cursor: pointer; 
-            width: 100%; 
+
+        .btn {
+            background-color: #40a7e3;
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
             font-weight: bold;
             transition: transform 0.1s, background-color 0.2s;
             box-shadow: 0 4px 10px rgba(64, 167, 227, 0.3);
         }
-        
-        .btn:active { transform: scale(0.98); background-color: #3596cc; }
-        .btn.danger { background-color: #e53935; box-shadow: 0 4px 10px rgba(229, 57, 53, 0.3); }
 
-        .best-speaker { 
-            background: #2b3745; 
-            border-left: 4px solid #ffcc00; 
-            padding: 15px; 
-            margin-top: 30px; 
+        .btn:active {
+            transform: scale(0.98);
+            background-color: #3596cc;
+        }
+
+        .btn.danger {
+            background-color: #e53935;
+            box-shadow: 0 4px 10px rgba(229, 57, 53, 0.3);
+        }
+
+        .best-speaker {
+            background: #2b3745;
+            border-left: 4px solid #ffcc00;
+            padding: 15px;
+            margin-top: 30px;
             text-align: left;
             border-radius: 8px;
         }
-        
-        .best-speaker strong { display: block; margin-bottom: 5px; color: #ffcc00; }
-        #awards-list { margin: 0; font-size: 14px; color: #d1d1d1; }
+
+        .best-speaker strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffcc00;
+        }
+
+        #awards-list {
+            margin: 0;
+            font-size: 14px;
+            color: #d1d1d1;
+        }
 
         .live-indicator {
             display: inline-block;
@@ -79,11 +110,27 @@
             margin-right: 8px;
             animation: blink 1s infinite;
         }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        #remote-audio { display: none; }
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        #remote-audio {
+            display: none;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="status-card">
@@ -94,9 +141,10 @@
             </div>
             <div id="timer-display" class="timer">02:00</div>
         </div>
-        
+
         <button id="main-btn" class="btn" onclick="startSearch()">Start Conversation</button>
-        <button id="end-btn" class="btn danger" style="display:none; margin-top: 10px;" onclick="location.reload()">End Debate</button>
+        <button id="end-btn" class="btn danger" style="display:none; margin-top: 10px;" onclick="location.reload()">End
+            Debate</button>
 
         <audio id="remote-audio" autoplay></audio>
 
@@ -132,7 +180,7 @@
             mainBtn.style.display = 'none';
             endBtn.style.display = 'block';
             statusText.innerText = `Matched as Team ${role}. Connecting...`;
-            
+
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 setupPeer();
@@ -171,9 +219,17 @@
 
         function handleCall(call) {
             call.on('stream', (stream) => {
+                console.log("Logged remote stream");
                 remoteAudio.srcObject = stream;
-                statusText.innerText = "Connected! Start talking.";
-                connStatus.style.display = 'block';
+                remoteAudio.play().then(() => {
+                    statusText.innerText = "Connected! Start talking.";
+                    connStatus.style.display = 'block';
+                    console.log("Audio playing correctly.");
+                }).catch(err => {
+                    statusText.innerText = "Audio play blocked. Click here to listen.";
+                    console.log("Audio play failed:", err);
+                    document.body.onclick = () => remoteAudio.play();
+                });
             });
 
             call.on('close', () => {
@@ -190,11 +246,12 @@
             mainBtn.style.opacity = "0.7";
 
             tg.sendData("start_search");
-            
+
             setTimeout(() => {
                 tg.close();
             }, 500);
         }
     </script>
 </body>
+
 </html>
