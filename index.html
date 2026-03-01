@@ -6,6 +6,7 @@
     <title>Talk Clash Debate</title>
     <!-- Telegram WebApp uchun asosiy skript (buni o'zgartirmang) -->
     <script src="https://telegram.org"></script>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <style>
         body { 
             background-color: #1c252e; 
@@ -55,6 +56,7 @@
         }
         
         .btn:active { transform: scale(0.98); background-color: #3596cc; }
+        .btn.danger { background-color: #e53935; box-shadow: 0 4px 10px rgba(229, 57, 53, 0.3); }
 
         .best-speaker { 
             background: #2b3745; 
@@ -67,17 +69,36 @@
         
         .best-speaker strong { display: block; margin-bottom: 5px; color: #ffcc00; }
         #awards-list { margin: 0; font-size: 14px; color: #d1d1d1; }
+
+        .live-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #e53935;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        #remote-audio { display: none; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="status-card">
-            <h2>Debat Practice</h2>
+            <h2 id="title">Debat Practice</h2>
             <p id="status-text">Tayyormisiz? Raqib qidirishni boshlang.</p>
+            <div id="connection-status" style="display:none; font-size: 14px; margin-bottom: 10px;">
+                <span class="live-indicator"></span> LIVE AUDIO
+            </div>
             <div id="timer-display" class="timer">02:00</div>
         </div>
         
         <button id="main-btn" class="btn" onclick="startSearch()">Start Conversation</button>
+        <button id="end-btn" class="btn danger" style="display:none; margin-top: 10px;" onclick="location.reload()">End Debate</button>
+
+        <audio id="remote-audio" autoplay></audio>
 
         <div id="achievements" class="best-speaker">
             <strong>🏆 Mening unvonlarim:</strong>
@@ -86,29 +107,90 @@
     </div>
 
     <script>
-        // Telegram WebApp obyektini yuklaymiz
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Ilovani to'liq ekranga yoyish
-        
-        // Ilova ranglarini Telegram ranglariga moslash (ixtiyoriy)
+        tg.expand();
         tg.ready();
 
-        function startSearch() {
-            // Vizual o'zgarishlar
-            const btn = document.getElementById('main-btn');
-            const status = document.getElementById('status-text');
-            
-            status.innerText = "Raqib qidirilmoqda...";
-            status.style.color = "#40a7e3";
-            btn.innerText = "Navbatda turibsiz...";
-            btn.disabled = true;
-            btn.style.opacity = "0.7";
+        const urlParams = new URLSearchParams(window.location.search);
+        const matchId = urlParams.get('match_id');
+        const role = urlParams.get('role');
 
-            // BOTGA MA'LUMOT YUBORISH
-            // Bu ma'lumot main.py dagi F.web_app_data ga boradi
+        const statusText = document.getElementById('status-text');
+        const mainBtn = document.getElementById('main-btn');
+        const endBtn = document.getElementById('end-btn');
+        const connStatus = document.getElementById('connection-status');
+        const remoteAudio = document.getElementById('remote-audio');
+
+        let peer = null;
+        let localStream = null;
+
+        if (matchId && role) {
+            initLiveDebate();
+        }
+
+        async function initLiveDebate() {
+            mainBtn.style.display = 'none';
+            endBtn.style.display = 'block';
+            statusText.innerText = `Matched as Team ${role}. Connecting...`;
+            
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                setupPeer();
+            } catch (err) {
+                console.error(err);
+                statusText.innerText = "Error: Microphone access denied.";
+            }
+        }
+
+        function setupPeer() {
+            // Role A is the receiver (listener), Role B is the caller
+            const peerId = `debate_${matchId}_${role}`;
+            peer = new Peer(peerId);
+
+            peer.on('open', (id) => {
+                console.log('My peer ID is: ' + id);
+                if (role === 'B') {
+                    // Give A a second to initialize
+                    setTimeout(() => {
+                        const call = peer.call(`debate_${matchId}_A`, localStream);
+                        handleCall(call);
+                    }, 2000);
+                }
+            });
+
+            peer.on('call', (call) => {
+                call.answer(localStream);
+                handleCall(call);
+            });
+
+            peer.on('error', (err) => {
+                console.error(err);
+                statusText.innerText = "Connection error: " + err.type;
+            });
+        }
+
+        function handleCall(call) {
+            call.on('stream', (stream) => {
+                remoteAudio.srcObject = stream;
+                statusText.innerText = "Connected! Start talking.";
+                connStatus.style.display = 'block';
+            });
+
+            call.on('close', () => {
+                statusText.innerText = "Debate ended.";
+                connStatus.style.display = 'none';
+            });
+        }
+
+        function startSearch() {
+            statusText.innerText = "Raqib qidirilmoqda...";
+            statusText.style.color = "#40a7e3";
+            mainBtn.innerText = "Navbatda turibsiz...";
+            mainBtn.disabled = true;
+            mainBtn.style.opacity = "0.7";
+
             tg.sendData("start_search");
             
-            // Tugma bosilgach ilovani yopish (foydalanuvchi chatga qaytishi uchun)
             setTimeout(() => {
                 tg.close();
             }, 500);
