@@ -179,42 +179,64 @@
         async function initLiveDebate() {
             mainBtn.style.display = 'none';
             endBtn.style.display = 'block';
-            statusText.innerText = `Matched as Team ${role}. Connecting...`;
+            statusText.innerText = `Matched as Team ${role}. Requesting microphone...`;
 
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                statusText.innerText = "Microphone OK. Connecting to peer...";
                 setupPeer();
             } catch (err) {
                 console.error(err);
-                statusText.innerText = "Error: Microphone access denied.";
+                statusText.innerText = "Error: Microphone access denied. Please enable it in Telegram settings and refresh.";
+                statusText.style.color = "#e53935";
             }
         }
 
         function setupPeer() {
-            // Role A is the receiver (listener), Role B is the caller
             const peerId = `debate_${matchId}_${role}`;
             peer = new Peer(peerId);
 
             peer.on('open', (id) => {
                 console.log('My peer ID is: ' + id);
                 if (role === 'B') {
-                    // Give A a second to initialize
-                    setTimeout(() => {
-                        const call = peer.call(`debate_${matchId}_A`, localStream);
-                        handleCall(call);
-                    }, 2000);
+                    tryCall(0);
                 }
             });
 
             peer.on('call', (call) => {
+                console.log("Receiving call...");
                 call.answer(localStream);
                 handleCall(call);
             });
 
             peer.on('error', (err) => {
-                console.error(err);
-                statusText.innerText = "Connection error: " + err.type;
+                console.error("Peer Error:", err.type);
+                if (err.type === 'peer-unavailable' && role === 'B') {
+                    statusText.innerText = "Raqib hali ulanmadi. Qayta urinilmoqda...";
+                } else {
+                    statusText.innerText = "Connection error: " + err.type;
+                }
             });
+        }
+
+        function tryCall(attempt) {
+            if (attempt > 10) {
+                statusText.innerText = "Raqib topilmadi. Iltimos ikkala telefonda ham Microphoneni yoqib, qayta kiring.";
+                return;
+            }
+
+            console.log(`Attempting to call Role A (Attempt ${attempt})...`);
+            const call = peer.call(`debate_${matchId}_A`, localStream);
+
+            if (call) {
+                handleCall(call);
+                // Watch for connection
+                setTimeout(() => {
+                    if (statusText.innerText.includes("Connecting") || statusText.innerText.includes("hali ulanmadi")) {
+                        tryCall(attempt + 1);
+                    }
+                }, 5000);
+            }
         }
 
         function handleCall(call) {
