@@ -700,8 +700,10 @@
         // API HELPER
         async function api(endpoint, body = {}) {
             try {
-                const baseUrl = 'http://localhost:8080';
-                    
+                const params = new URLSearchParams(window.location.search);
+                const apiOverride = params.get('api');
+                const baseUrl = apiOverride ? apiOverride.replace(/\/$/, '') : window.location.origin;
+
                 const res = await fetch(`${baseUrl}${endpoint}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -759,10 +761,17 @@
             if (res.status === 'matched') {
                 enterDebate(res);
             } else if (res.status === 'waiting') {
-                el.innerText = "Navbatdasiz. Raqib kutilmoqda...";
+                const c = res.current || 1;
+                const n = res.needed || 2;
+                el.innerText = `${c}/${n} — Navbatdasiz. Raqib kutilmoqda...`;
                 pollTimer = setInterval(async () => {
                     const check = await api('/api/check-match');
                     if (check.status === 'matched') enterDebate(check);
+                    else if (check.status === 'waiting') {
+                        const cc = check.current || 1;
+                        const nn = check.needed || 2;
+                        el.innerText = `${cc}/${nn} — Navbatdasiz. Raqib kutilmoqda...`;
+                    }
                 }, 2000);
             } else {
                 el.innerText = res.message || "Xatolik!";
@@ -797,7 +806,7 @@
             if (res.status === 'ok') {
                 activeRoomCode = code;
                 document.getElementById('waiting-room-code').innerText = code;
-                document.getElementById('waiting-room-name').innerText = `Salom, ${name}! Raqib kutilmoqda...`;
+                document.getElementById('waiting-room-name').innerText = `1/2 — Salom, ${name}! Raqib kutilmoqda...`;
                 showScreen('screen-waiting-room');
 
                 pollTimer = setInterval(async () => {
