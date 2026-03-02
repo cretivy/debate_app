@@ -842,10 +842,13 @@
         }
 
         // ===== API HELPER =====
-        // Same-origin server — no CORS, relative URL
+        // API helper - use absolute URL for CORS fix
         async function api(endpoint, body = {}) {
             try {
-                const res = await fetch(endpoint, {
+                // For Telegram WebApp, use HTTP localhost for local testing
+                const baseUrl = 'http://localhost:8080';
+                    
+                const res = await fetch(`${baseUrl}${endpoint}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: userId, ...body })
