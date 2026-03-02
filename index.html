@@ -702,6 +702,11 @@
             try {
                 const params = new URLSearchParams(window.location.search);
                 const apiOverride = params.get('api');
+                const isGithubPages = window.location.hostname.endsWith('github.io');
+                if (isGithubPages && !apiOverride) {
+                    return { status: 'error', message: 'Backend topilmadi. GitHub Pages uchun linkni ?api=https://XXXX.trycloudflare.com bilan oching.' };
+                }
+
                 const baseUrl = apiOverride ? apiOverride.replace(/\/$/, '') : window.location.origin;
 
                 const res = await fetch(`${baseUrl}${endpoint}`, {
