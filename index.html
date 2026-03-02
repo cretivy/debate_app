@@ -61,6 +61,7 @@
             margin: 0;
             background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -1px;
         }
@@ -414,11 +415,17 @@
             });
 
             peer.on('error', (err) => {
-                if (err.type === 'peer-unavailable' && role === 'B') {
-                    statusText.innerText = "Raqib hali ulanmadi. Qayta urinilmoqda...";
+                console.error("PeerJS Error:", err.type, err);
+                if (err.type === 'peer-unavailable') {
+                    statusText.innerText = role === 'B' ? "Raqib hali ulanmadi. Qayta urinilmoqda..." : "Raqib ulanishdan uzildi.";
+                } else if (err.type === 'browser-incompatible') {
+                    statusText.innerText = "Brauzer WebRTCni qo'llab-quvvatlamaydi.";
+                } else if (err.type === 'network') {
+                    statusText.innerText = "Internetda uzilish aniqlandi.";
                 } else {
-                    statusText.innerText = "Ulanish xatosi: " + err.type;
+                    statusText.innerText = `Ulanish xatosi: ${err.type}`;
                 }
+                statusText.style.color = "var(--danger)";
             });
         }
 
