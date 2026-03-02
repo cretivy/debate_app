@@ -826,6 +826,12 @@
     <audio id="remote-audio" autoplay playsinline></audio>
 
     <script>
+        // ===== CONFIG =====
+        // Server manzili — lokal yoki deploy qilingan
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8000'
+            : 'https://your-server.onrender.com'; // Deploy qilganda o'zgartiring
+
         // ===== TELEGRAM WEBAPP SETUP =====
         let tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (tg) {
@@ -833,7 +839,14 @@
             tg.ready();
         }
 
-        // Helper: alert that works both inside and outside Telegram
+        // Foydalanuvchi ID — Telegram'dan yoki random
+        const userId = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user)
+            ? String(tg.initDataUnsafe.user.id)
+            : 'test_' + Math.random().toString(36).substring(2, 10);
+
+        console.log('User ID:', userId);
+
+        // Helper: alert
         function showAlert(msg) {
             if (tg && tg.showAlert) {
                 tg.showAlert(msg);
@@ -842,26 +855,25 @@
             }
         }
 
-        // Helper: send data (only works in real Telegram WebApp context)
-        function sendData(obj) {
-            if (tg && tg.sendData) {
-                try {
-                    tg.sendData(JSON.stringify(obj));
-                    return true;
-                } catch (e) {
-                    console.warn('sendData failed:', e);
-                    return false;
-                }
+        // Helper: API so'rov
+        async function apiCall(endpoint, body) {
+            try {
+                const res = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, ...body })
+                });
+                return await res.json();
+            } catch (err) {
+                console.error('API error:', err);
+                return { status: 'error', message: 'Serverga ulanib bo\'lmadi. Internet tekshiring.' };
             }
-            // Not in Telegram: log for debugging
-            console.log('WebApp data (not in TG):', obj);
-            return true; // simulate success
         }
 
         // ===== URL PARAMS (for live debate) =====
         const urlParams = new URLSearchParams(window.location.search);
-        const matchId = urlParams.get('match_id');
-        const role = urlParams.get('role');
+        let matchId = urlParams.get('match_id');
+        let role = urlParams.get('role');
 
         // ===== GLOBALS =====
         let peer = null;
@@ -869,6 +881,8 @@
         let isMuted = false;
         let audioContext, analyser, dataArray;
         let activeRoomCode = null;
+        let searchPollTimer = null;
+        let roomPollTimer = null;
 
         // ===== SCREEN NAVIGATION =====
         function showScreen(screenId) {
@@ -882,75 +896,107 @@
             initLiveDebate();
         }
 
+        // ===== Helper: Debatga kirish =====
+        function enterDebate(data) {
+            // Polling larni to'xtatish
+            stopAllPolling();
+
+            matchId = data.match_id;
+            role = data.role;
+
+            showScreen('screen-active');
+            document.getElementById('status-text').innerText = `Raqib: ${data.opponent_name || 'Topildi'}! Ulanmoqda...`;
+            initLiveDebate();
+        }
+
+        function stopAllPolling() {
+            if (searchPollTimer) { clearInterval(searchPollTimer); searchPollTimer = null; }
+            if (roomPollTimer) { clearInterval(roomPollTimer); roomPollTimer = null; }
+        }
+
+        // ===== RANDOM SEARCH =====
+        async function startSearch() {
+            const statusText = document.getElementById('status-text-main');
+            statusText.innerText = "Raqib qidirilmoqda... ⏳";
+
+            const result = await apiCall('/api/search', { name: 'Foydalanuvchi' });
+            console.log('Search result:', result);
+
+            if (result.status === 'matched') {
+                // Darhol raqib topildi!
+                enterDebate(result);
+            } else if (result.status === 'waiting') {
+                statusText.innerText = "Navbatdasiz. Raqib kutilmoqda... ⏳";
+                // Polling boshlash — har 2 sekundda tekshirish
+                searchPollTimer = setInterval(async () => {
+                    const check = await apiCall('/api/check-match', {});
+                    console.log('Poll check:', check);
+                    if (check.status === 'matched') {
+                        enterDebate(check);
+                    }
+                }, 2000);
+            } else {
+                statusText.innerText = result.message || "Xatolik yuz berdi.";
+            }
+        }
+
         // ===== CREATE ROOM =====
-        function handleCreateRoom() {
+        async function handleCreateRoom() {
             const name = document.getElementById('create-name').value.trim();
             const code = document.getElementById('create-code').value.trim();
 
-            if (!name) {
-                showAlert("Iltimos, ismingizni kiriting!");
-                return;
-            }
-            if (!code) {
-                showAlert("Iltimos, komnata kodini kiriting!");
-                return;
-            }
+            if (!name) { showAlert("Iltimos, ismingizni kiriting!"); return; }
+            if (!code) { showAlert("Iltimos, komnata kodini kiriting!"); return; }
 
-            // Show waiting screen immediately
-            activeRoomCode = code;
-            document.getElementById('waiting-room-code').innerText = code;
-            document.getElementById('waiting-room-name').innerText = `Salom, ${name}! Raqib kutilmoqda...`;
-            showScreen('screen-waiting-room');
+            const result = await apiCall('/api/create-room', { name, code });
+            console.log('Create room result:', result);
 
-            // Send data to bot
-            sendData({
-                action: "create_room",
-                name: name,
-                code: code
-            });
+            if (result.status === 'ok') {
+                activeRoomCode = code;
+                document.getElementById('waiting-room-code').innerText = code;
+                document.getElementById('waiting-room-name').innerText = `Salom, ${name}! Raqib kutilmoqda...`;
+                showScreen('screen-waiting-room');
+
+                // Polling — raqib kirishini kutish
+                roomPollTimer = setInterval(async () => {
+                    const check = await apiCall('/api/check-room', { code });
+                    console.log('Room poll:', check);
+                    if (check.status === 'matched') {
+                        enterDebate(check);
+                    }
+                }, 2000);
+            } else {
+                showAlert(result.message || "Komnata yaratib bo'lmadi.");
+            }
         }
 
         // ===== CANCEL ROOM =====
-        function cancelRoom() {
+        async function cancelRoom() {
+            stopAllPolling();
             if (activeRoomCode) {
-                sendData({
-                    action: "cancel_room",
-                    code: activeRoomCode
-                });
+                await apiCall('/api/cancel-room', { code: activeRoomCode });
                 activeRoomCode = null;
             }
             showScreen('screen-room-choice');
         }
 
         // ===== JOIN ROOM =====
-        function handleJoinRoom() {
+        async function handleJoinRoom() {
             const name = document.getElementById('join-name').value.trim();
             const code = document.getElementById('join-code').value.trim();
 
-            if (!name) {
-                showAlert("Iltimos, ismingizni kiriting!");
-                return;
+            if (!name) { showAlert("Iltimos, ismingizni kiriting!"); return; }
+            if (!code) { showAlert("Iltimos, komnata kodini kiriting!"); return; }
+
+            const result = await apiCall('/api/join-room', { name, code });
+            console.log('Join room result:', result);
+
+            if (result.status === 'matched') {
+                // Muvaffaqiyatli! Debatga kirish
+                enterDebate(result);
+            } else {
+                showAlert(result.message || "Komnataga kirib bo'lmadi.");
             }
-            if (!code) {
-                showAlert("Iltimos, komnata kodini kiriting!");
-                return;
-            }
-
-            // Update main screen status and go back while sending data
-            document.getElementById('status-text-main').innerText = "Komnataga ulanish...";
-            showScreen('screen-main');
-
-            sendData({
-                action: "join_room",
-                name: name,
-                code: code
-            });
-        }
-
-        // ===== RANDOM SEARCH =====
-        function startSearch() {
-            document.getElementById('status-text-main').innerText = "Raqib qidirilmoqda... ⏳";
-            sendData({ action: "start_search" });
         }
 
         // ===== LIVE DEBATE =====
@@ -986,10 +1032,12 @@
             peer = new Peer(peerId, { debug: 1 });
 
             peer.on('open', () => {
+                console.log('Peer opened with ID:', peerId);
                 if (role === 'B') tryCall(0);
             });
 
             peer.on('call', (call) => {
+                console.log('Incoming call received');
                 call.answer(localStream);
                 handleCall(call);
             });
@@ -1013,6 +1061,7 @@
                 statusText.innerText = "Raqib topilmadi. Qayta urinib ko'ring.";
                 return;
             }
+            statusText.innerText = `Raqibga ulanmoqda... (${attempt + 1}/30)`;
             const call = peer.call(`debate_${matchId}_A`, localStream);
             if (call) {
                 handleCall(call);
