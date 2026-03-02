@@ -7,289 +7,559 @@
     <title>Talk Clash - Premium Debate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <style>
         :root {
-            --primary: #40a7e3;
-            --accent: #ffcc00;
-            --danger: #ff4b5c;
-            --bg: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --glass: rgba(255, 255, 255, 0.05);
-            --text: #f8fafc;
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4338ca;
+            --accent: #f59e0b;
+            --accent-light: #fcd34d;
+            --success: #10b981;
+            --danger: #ef4444;
+            --danger-dark: #b91c1c;
+            --bg: #0a0a1a;
+            --bg2: #0f0f2a;
+            --card: rgba(255, 255, 255, 0.04);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --text: #f1f5f9;
             --text-dim: #94a3b8;
+            --text-muted: #64748b;
         }
 
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
         }
 
+        html,
         body {
-            background-color: var(--bg);
-            background-image: radial-gradient(circle at top right, rgba(64, 167, 227, 0.15), transparent),
-                radial-gradient(circle at bottom left, rgba(255, 204, 0, 0.05), transparent);
-            color: var(--text);
-            font-family: 'Outfit', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
             overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -30%;
+            width: 80vw;
+            height: 80vw;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -30%;
+            left: -20%;
+            width: 70vw;
+            height: 70vw;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
             width: 100%;
-            max-width: 420px;
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 20px 16px 30px;
             display: flex;
             flex-direction: column;
-            height: 100%;
-            z-index: 10;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
         }
 
+        /* ===== HEADER ===== */
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            animation: fadeInDown 0.8s ease-out;
+            padding: 16px 0 28px;
+            animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .logo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 100px;
+            padding: 6px 16px;
+            margin-bottom: 14px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--primary-light);
+        }
+
+        .logo-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--success);
+            animation: breathe 2s infinite;
         }
 
         .header h1 {
-            font-size: 32px;
-            font-weight: 800;
-            margin: 0;
-            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            font-size: 36px;
+            font-weight: 900;
+            margin: 0 0 6px;
+            background: linear-gradient(135deg, #fff 0%, var(--primary-light) 50%, var(--accent) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: -1px;
+            letter-spacing: -1.5px;
+            line-height: 1;
         }
 
         .header p {
-            color: var(--text-dim);
-            margin: 5px 0 0;
-            font-size: 14px;
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 13px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
         }
 
+        /* ===== SCREENS ===== */
         .screen {
             display: none;
             width: 100%;
-            animation: fadeIn 0.4s ease-out;
+            animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            flex: 1;
         }
 
         .screen.active {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        .status-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass);
-            padding: 40px 20px;
-            border-radius: 32px;
-            margin-bottom: 25px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 28px 20px;
             text-align: center;
             position: relative;
             overflow: hidden;
-            animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
-        .status-card::before {
+        .card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
         }
 
-        #status-text {
-            color: var(--text-dim);
-            font-size: 16px;
-            margin-bottom: 10px;
-            font-weight: 400;
-        }
-
-        .timer {
-            font-size: 64px;
-            color: var(--text);
-            font-weight: 800;
-            margin: 10px 0;
-            letter-spacing: -2px;
-            text-shadow: 0 0 20px rgba(64, 167, 227, 0.3);
-        }
-
-        .live-status {
+        .card-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            color: var(--danger);
-            margin-top: 10px;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.4s ease;
+            font-size: 28px;
+            margin: 0 auto 16px;
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.35);
         }
 
-        .live-status.active {
-            opacity: 1;
-            transform: translateY(0);
+        .card h2 {
+            margin: 0 0 8px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
         }
 
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--danger);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--danger);
-            animation: pulse 1.5s infinite;
+        .card p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-dim);
+            line-height: 1.5;
         }
 
+        /* ===== VISUALIZER ===== */
+        .visualizer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin: 16px 0 8px;
+            height: 36px;
+        }
+
+        .bar {
+            width: 3px;
+            height: 10px;
+            background: linear-gradient(to top, var(--primary), var(--primary-light));
+            border-radius: 2px;
+            transition: height 0.1s ease;
+            animation: idleBar 2s ease-in-out infinite;
+        }
+
+        .bar:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .bar:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .bar:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .bar:nth-child(4) {
+            animation-delay: 0.1s;
+        }
+
+        .bar:nth-child(5) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes idleBar {
+
+            0%,
+            100% {
+                height: 6px;
+                opacity: 0.4;
+            }
+
+            50% {
+                height: 20px;
+                opacity: 1;
+            }
+        }
+
+        /* ===== BUTTONS ===== */
         .btn-group {
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            width: 100%;
+            gap: 10px;
         }
 
         .btn {
-            background: linear-gradient(135deg, var(--primary) 0%, #2563eb 100%);
-            color: white;
-            border: none;
-            padding: 20px;
-            border-radius: 20px;
-            font-size: 18px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
+            padding: 17px 20px;
+            border-radius: 16px;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
             text-decoration: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            letter-spacing: 0.2px;
+        }
+
+        .btn-icon {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0);
+            transition: background 0.2s;
+        }
+
+        .btn:active::after {
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .btn:active {
-            transform: scale(0.96);
-            filter: brightness(1.1);
+            transform: scale(0.97);
         }
 
         .btn:disabled {
-            background: var(--card-bg);
-            color: var(--text-dim);
-            box-shadow: none;
+            opacity: 0.45;
             cursor: not-allowed;
-            opacity: 0.7;
+            transform: none !important;
         }
 
-        .btn.secondary {
+        /* Primary */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35), 0 1px 0 rgba(255, 255, 255, 0.15) inset;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 12px 35px rgba(99, 102, 241, 0.5);
+            transform: translateY(-1px);
+        }
+
+        /* Secondary */
+        .btn-secondary {
             background: var(--glass);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
             color: var(--text);
         }
 
-        .btn.danger {
-            background: linear-gradient(135deg, var(--danger) 0%, #b91c1c 100%);
-            box-shadow: 0 10px 25px rgba(229, 62, 62, 0.2);
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
+        /* Accent */
+        .btn-accent {
+            background: linear-gradient(135deg, var(--accent) 0%, #d97706 100%);
+            color: #0a0a1a;
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
+        /* Danger */
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+            color: #fff;
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.25);
+        }
+
+        /* Ghost */
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--card-border);
             color: var(--text-dim);
+            font-size: 14px;
+        }
+
+        /* ===== FORM ===== */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: var(--text-muted);
         }
 
         .input-field {
             width: 100%;
             background: var(--glass);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            padding: 14px 16px;
+            border-radius: 14px;
             color: var(--text);
-            font-family: inherit;
-            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
             outline: none;
+            transition: all 0.2s;
+        }
+
+        .input-field::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
         }
 
         .input-field:focus {
             border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(99, 102, 241, 0.08);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
         }
 
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 5px;
-            display: none;
+        /* ===== WAITING SCREEN ===== */
+        .waiting-ring {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--card-border);
+            border-top: 3px solid var(--primary);
+            border-right: 3px solid var(--primary-light);
+            animation: spin 1.2s linear infinite;
+            margin: 0 auto 20px;
         }
 
-        .controls.active {
-            display: grid;
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
-        .visualizer {
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            margin: 20px 0;
+        .room-code-display {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 16px;
+            padding: 14px 20px;
+            margin: 0 auto 8px;
+            display: inline-block;
         }
 
-        .bar {
-            width: 4px;
-            height: 10px;
-            background: var(--primary);
-            border-radius: 2px;
-            transition: height 0.1s ease;
-        }
-
-        .achievements-card {
-            background: var(--glass);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            padding: 20px;
-            margin-top: auto;
-            text-align: left;
-        }
-
-        .achievements-card h3 {
-            margin: 0 0 12px 0;
-            font-size: 14px;
+        .room-code-display .code-label {
+            font-size: 11px;
             font-weight: 600;
-            color: var(--accent);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .room-code-display .code-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary-light);
+            letter-spacing: 4px;
+        }
+
+        /* ===== LIVE DEBATE ===== */
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 100px;
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--danger);
+            opacity: 0;
+            transform: translateY(8px);
+            transition: all 0.3s ease;
+        }
+
+        .live-badge.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--danger);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--danger);
+            animation: breathe 1.2s infinite;
+        }
+
+        .timer-display {
+            font-size: 60px;
+            font-weight: 900;
+            letter-spacing: -3px;
+            margin: 10px 0;
+            background: linear-gradient(135deg, #fff, var(--primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ===== ACHIEVEMENTS ===== */
+        .achievements {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 16px 18px;
+            margin-top: auto;
+        }
+
+        .achievements-header {
             display: flex;
             align-items: center;
             gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
         }
 
-        #awards-list {
+        .achievements p {
             margin: 0;
-            font-size: 13px;
-            color: var(--text-dim);
+            font-size: 12px;
+            color: var(--text-muted);
             line-height: 1.6;
         }
 
-        @keyframes fadeIn {
+        /* ===== INFO BOX ===== */
+        .info-box {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 14px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #6ee7b7;
+            line-height: 1.5;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .info-box-icon {
+            font-size: 16px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* ===== DIVIDER ===== */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--card-border);
+        }
+
+        /* ===== CONTROLS ===== */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            display: none;
+        }
+
+        .controls-grid.show {
+            display: grid;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeUp {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(16px);
             }
 
             to {
@@ -298,8 +568,22 @@
             }
         }
 
-        @keyframes pulse {
-            0% {
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
                 transform: scale(1);
                 opacity: 1;
             }
@@ -308,39 +592,51 @@
                 transform: scale(1.5);
                 opacity: 0.5;
             }
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.9);
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 20px rgba(99, 102, 241, 0);
+            }
 
             100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes scaleIn {
-            from {
-                opacity: 0;
                 transform: scale(0.9);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
             }
         }
 
         #remote-audio {
             display: none;
+        }
+
+        /* Status text */
+        .status-text {
+            font-size: 15px;
+            color: var(--text-dim);
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        .status-text.error {
+            color: var(--danger);
+        }
+
+        /* Control button labels */
+        .controls-grid .btn {
+            flex-direction: column;
+            gap: 5px;
+            padding: 14px 10px;
+            font-size: 13px;
+        }
+
+        .controls-grid .btn .btn-icon {
+            font-size: 22px;
         }
     </style>
 </head>
@@ -348,219 +644,321 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Talk Clash</h1>
-            <p>Premium Real-time Debate</p>
+            <div class="logo-badge">
+                <span class="logo-dot"></span>
+                Talk Clash
+            </div>
+            <h1>Debate Live</h1>
+            <p>Real-time voice debate platform</p>
         </div>
 
-        <!-- MAIN SCREEN -->
+        <!-- ===== MAIN SCREEN ===== -->
         <div id="screen-main" class="screen active">
-            <div class="status-card">
-                <p id="status-text-main">Hush kelibsiz! Qanday debatni xohlaysiz?</p>
+            <div class="card">
+                <div class="card-icon">🎙</div>
+                <h2>Debatga xush kelibsiz!</h2>
+                <p class="status-text" id="status-text-main">Quyidagi usuldan birini tanlang</p>
                 <div class="visualizer">
                     <div class="bar"></div>
                     <div class="bar"></div>
                     <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
                 </div>
             </div>
             <div class="btn-group">
-                <button class="btn" onclick="startSearch()">
-                    <span>🚀</span> Random Match
+                <button class="btn btn-primary" onclick="startSearch()">
+                    <span class="btn-icon">🚀</span>
+                    Tasodifiy raqib topish
                 </button>
-                <button class="btn secondary" onclick="showScreen('screen-room-choice')">
-                    <span>🏠</span> Komnata orqali
+                <button class="btn btn-secondary" onclick="showScreen('screen-room-choice')">
+                    <span class="btn-icon">🏠</span>
+                    Komnata orqali
                 </button>
             </div>
         </div>
 
-        <!-- ROOM CHOICE SCREEN -->
+        <!-- ===== ROOM CHOICE SCREEN ===== -->
         <div id="screen-room-choice" class="screen">
-            <div class="status-card">
-                <p>Private Room tanlang</p>
+            <div class="card">
+                <div class="card-icon">🔐</div>
+                <h2>Private Komnata</h2>
+                <p>Do'stingiz bilan yakkama-yakka debat o'tkazing</p>
             </div>
             <div class="btn-group">
-                <button class="btn" onclick="showScreen('screen-create-room')">
-                    <span>➕</span> Create Room
+                <button class="btn btn-primary" onclick="showScreen('screen-create-room')">
+                    <span class="btn-icon">➕</span>
+                    Yangi komnata yaratish
                 </button>
-                <button class="btn secondary" onclick="showScreen('screen-join-room')">
-                    <span>🔑</span> Join Room
+                <button class="btn btn-accent" onclick="showScreen('screen-join-room')">
+                    <span class="btn-icon">🔑</span>
+                    Komnataga kirish
                 </button>
-                <button class="btn danger" onclick="showScreen('screen-main')">
-                    <span>⬅️</span> Orqaga
+                <button class="btn btn-ghost" onclick="showScreen('screen-main')">
+                    <span class="btn-icon">←</span>
+                    Orqaga
                 </button>
             </div>
         </div>
 
-        <!-- CREATE ROOM SCREEN -->
+        <!-- ===== CREATE ROOM SCREEN ===== -->
         <div id="screen-create-room" class="screen">
-            <div class="status-card">
-                <p>Yangi komnata yaratish</p>
+            <div class="card">
+                <div class="card-icon">✨</div>
+                <h2>Komnata yaratish</h2>
+                <p>Ismingizni va maxfiy kodni kiriting</p>
             </div>
             <div class="form-group">
-                <label>Ism Familiyangiz</label>
+                <span class="form-label">Ism Familiyangiz</span>
                 <input type="text" id="create-name" class="input-field" placeholder="Masalan: Ali Valiev">
             </div>
             <div class="form-group">
-                <label>Komnata Kodi</label>
-                <input type="text" id="create-code" class="input-field" placeholder="Masalan: 7777">
+                <span class="form-label">Komnata Kodi</span>
+                <input type="text" id="create-code" class="input-field" placeholder="Masalan: 7777" maxlength="10">
+            </div>
+            <div class="info-box">
+                <span class="info-box-icon">💡</span>
+                <span>Komnata yaratilgach, raqibingizga kodni bering. U kirishi bilan debat boshlanadi.</span>
             </div>
             <div class="btn-group">
-                <button class="btn" onclick="handleCreateRoom()">
-                    <span>✅</span> Create & Start
+                <button class="btn btn-primary" onclick="handleCreateRoom()">
+                    <span class="btn-icon">✅</span>
+                    Komnata ochish
                 </button>
-                <button class="btn danger" onclick="showScreen('screen-room-choice')">
-                    <span>⬅️</span> Orqaga
+                <button class="btn btn-ghost" onclick="showScreen('screen-room-choice')">
+                    <span class="btn-icon">←</span>
+                    Orqaga
                 </button>
             </div>
         </div>
 
-        <!-- JOIN ROOM SCREEN -->
+        <!-- ===== WAITING FOR OPPONENT (after create room) ===== -->
+        <div id="screen-waiting-room" class="screen">
+            <div class="card">
+                <div class="waiting-ring"></div>
+                <h2>Raqib kutilmoqda...</h2>
+                <p id="waiting-room-name" class="status-text">Komnatangiz tayyor!</p>
+                <div style="margin-top: 16px;">
+                    <div class="room-code-display">
+                        <div class="code-label">Komnata kodi</div>
+                        <div class="code-value" id="waiting-room-code">—</div>
+                    </div>
+                </div>
+                <p style="margin-top: 12px; font-size: 13px; color: var(--text-muted);">
+                    Raqibingiz ushbu kodni kiritishi bilan debat avtomatik boshlanadi
+                </p>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="cancelRoom()">
+                    <span class="btn-icon">✖</span>
+                    Bekor qilish
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== JOIN ROOM SCREEN ===== -->
         <div id="screen-join-room" class="screen">
-            <div class="status-card">
-                <p>Komnataga kirish</p>
+            <div class="card">
+                <div class="card-icon">🔑</div>
+                <h2>Komnataga kirish</h2>
+                <p>Yaratuvchi bergan kodni kiriting</p>
             </div>
             <div class="form-group">
-                <label>Ism Familiyangiz</label>
+                <span class="form-label">Ism Familiyangiz</span>
                 <input type="text" id="join-name" class="input-field" placeholder="Masalan: G'ani Sherov">
             </div>
             <div class="form-group">
-                <label>Komnata Kodi</label>
-                <input type="text" id="join-code" class="input-field" placeholder="Kod kriting...">
+                <span class="form-label">Komnata Kodi</span>
+                <input type="text" id="join-code" class="input-field" placeholder="Kodni kiriting..." maxlength="10">
             </div>
             <div class="btn-group">
-                <button class="btn" onclick="handleJoinRoom()">
-                    <span>🚀</span> Kirish
+                <button class="btn btn-primary" onclick="handleJoinRoom()">
+                    <span class="btn-icon">🚀</span>
+                    Kirish
                 </button>
-                <button class="btn danger" onclick="showScreen('screen-room-choice')">
-                    <span>⬅️</span> Orqaga
+                <button class="btn btn-ghost" onclick="showScreen('screen-room-choice')">
+                    <span class="btn-icon">←</span>
+                    Orqaga
                 </button>
             </div>
         </div>
 
-        <!-- ACTIVE CHAT SCREEN (OLD STATUS CARD) -->
+        <!-- ===== ACTIVE DEBATE SCREEN ===== -->
         <div id="screen-active" class="screen">
-            <div class="status-card">
-                <p id="status-text">Tayyormisiz?</p>
-                <div id="connection-status" class="live-status">
-                    <span class="live-dot"></span> LIVE AUDIO
+            <div class="card">
+                <p class="status-text" id="status-text">Tayyormisiz?</p>
+                <div class="timer-display" id="timer-display">02:00</div>
+                <div class="live-badge" id="live-badge">
+                    <span class="live-dot"></span>
+                    JONLI
                 </div>
-
-                <div class="visualizer" id="visualizer">
+                <div class="visualizer" id="visualizer" style="margin-top: 14px;">
                     <div class="bar"></div>
                     <div class="bar"></div>
                     <div class="bar"></div>
                     <div class="bar"></div>
                     <div class="bar"></div>
                 </div>
-
-                <div id="timer-display" class="timer">02:00</div>
             </div>
-
             <div class="btn-group">
-                <div class="controls" id="controls">
-                    <button id="mute-btn" class="btn secondary" onclick="toggleMute()">
-                        <span id="mute-icon">🎤</span> <span id="mute-text">Mute</span>
+                <div class="controls-grid" id="controls">
+                    <button id="mute-btn" class="btn btn-secondary" onclick="toggleMute()">
+                        <span id="mute-icon" class="btn-icon">🎤</span>
+                        <span id="mute-text">Mute</span>
                     </button>
-                    <button id="end-btn" class="btn danger" onclick="location.reload()">
-                        <span>🛑</span> End
+                    <button class="btn btn-danger" onclick="location.reload()">
+                        <span class="btn-icon">🛑</span>
+                        Tugatish
                     </button>
                 </div>
             </div>
         </div>
 
-        <div class="achievements-card">
-            <h3>🏆 Mening unvonlarim</h3>
-            <p id="awards-list">Hozircha yutuqlar yo'q. Debatda qatnashing va g'olib bo'ling!</p>
+        <!-- ===== ACHIEVEMENTS ===== -->
+        <div class="achievements" style="margin-top: 20px;">
+            <div class="achievements-header">
+                🏆 Mening yutuqlarim
+            </div>
+            <p id="awards-list">Hozircha yutuqlar yo'q. Debatda qatnashing!</p>
         </div>
     </div>
-
 
     <audio id="remote-audio" autoplay playsinline></audio>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
+        // ===== TELEGRAM WEBAPP SETUP =====
+        let tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg) {
+            tg.expand();
+            tg.ready();
+        }
 
+        // Helper: alert that works both inside and outside Telegram
+        function showAlert(msg) {
+            if (tg && tg.showAlert) {
+                tg.showAlert(msg);
+            } else {
+                alert(msg);
+            }
+        }
+
+        // Helper: send data (only works in real Telegram WebApp context)
+        function sendData(obj) {
+            if (tg && tg.sendData) {
+                try {
+                    tg.sendData(JSON.stringify(obj));
+                    return true;
+                } catch (e) {
+                    console.warn('sendData failed:', e);
+                    return false;
+                }
+            }
+            // Not in Telegram: log for debugging
+            console.log('WebApp data (not in TG):', obj);
+            return true; // simulate success
+        }
+
+        // ===== URL PARAMS (for live debate) =====
         const urlParams = new URLSearchParams(window.location.search);
         const matchId = urlParams.get('match_id');
         const role = urlParams.get('role');
 
-        const statusText = document.getElementById('status-text');
-        const controls = document.getElementById('controls');
-        const connStatus = document.getElementById('connection-status');
-        const remoteAudio = document.getElementById('remote-audio');
-        const muteBtn = document.getElementById('mute-btn');
-        const muteIcon = document.getElementById('mute-icon');
-        const muteText = document.getElementById('mute-text');
-        const bars = document.querySelectorAll('.bar');
-
+        // ===== GLOBALS =====
         let peer = null;
         let localStream = null;
         let isMuted = false;
         let audioContext, analyser, dataArray;
+        let activeRoomCode = null;
 
-        // --- UI LOGIC ---
+        // ===== SCREEN NAVIGATION =====
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
         }
 
+        // Auto-enter debate if URL has match params
         if (matchId && role) {
             showScreen('screen-active');
             initLiveDebate();
         }
 
+        // ===== CREATE ROOM =====
         function handleCreateRoom() {
             const name = document.getElementById('create-name').value.trim();
             const code = document.getElementById('create-code').value.trim();
 
-            if (!name || !code) {
-                tg.showAlert("Iltimos, ism va kodni kiriting!");
+            if (!name) {
+                showAlert("Iltimos, ismingizni kiriting!");
+                return;
+            }
+            if (!code) {
+                showAlert("Iltimos, komnata kodini kiriting!");
                 return;
             }
 
-            const data = {
+            // Show waiting screen immediately
+            activeRoomCode = code;
+            document.getElementById('waiting-room-code').innerText = code;
+            document.getElementById('waiting-room-name').innerText = `Salom, ${name}! Raqib kutilmoqda...`;
+            showScreen('screen-waiting-room');
+
+            // Send data to bot
+            sendData({
                 action: "create_room",
                 name: name,
                 code: code
-            };
-
-            tg.sendData(JSON.stringify(data));
-            document.getElementById('status-text-main').innerText = "Komnata yaratilmoqda...";
-            showScreen('screen-main');
+            });
         }
 
+        // ===== CANCEL ROOM =====
+        function cancelRoom() {
+            if (activeRoomCode) {
+                sendData({
+                    action: "cancel_room",
+                    code: activeRoomCode
+                });
+                activeRoomCode = null;
+            }
+            showScreen('screen-room-choice');
+        }
+
+        // ===== JOIN ROOM =====
         function handleJoinRoom() {
             const name = document.getElementById('join-name').value.trim();
             const code = document.getElementById('join-code').value.trim();
 
-            if (!name || !code) {
-                tg.showAlert("Iltimos, ism va kodni kiriting!");
+            if (!name) {
+                showAlert("Iltimos, ismingizni kiriting!");
+                return;
+            }
+            if (!code) {
+                showAlert("Iltimos, komnata kodini kiriting!");
                 return;
             }
 
-            const data = {
+            // Update main screen status and go back while sending data
+            document.getElementById('status-text-main').innerText = "Komnataga ulanish...";
+            showScreen('screen-main');
+
+            sendData({
                 action: "join_room",
                 name: name,
                 code: code
-            };
-
-            tg.sendData(JSON.stringify(data));
-            document.getElementById('status-text-main').innerText = "Komnataga ulanish kutilmoqda...";
-            showScreen('screen-main');
+            });
         }
 
+        // ===== RANDOM SEARCH =====
         function startSearch() {
-            const data = { action: "start_search" };
-            tg.sendData(JSON.stringify(data));
-            document.getElementById('status-text-main').innerText = "Raqib qidirilmoqda...";
-            // setTimeout(() => tg.close(), 500); // O'chirib turamiz test uchun
+            document.getElementById('status-text-main').innerText = "Raqib qidirilmoqda... ⏳";
+            sendData({ action: "start_search" });
         }
 
-        // --- DEBATE LOGIC ---
+        // ===== LIVE DEBATE =====
         async function initLiveDebate() {
-            controls.classList.add('active');
-            statusText.innerText = "Ruxsat kutilmoqda...";
+            const controls = document.getElementById('controls');
+            const statusText = document.getElementById('status-text');
+            controls.classList.add('show');
+            statusText.innerText = "Mikrofon ruxsati so'ralmoqda...";
 
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({
@@ -578,20 +976,17 @@
             } catch (err) {
                 console.error(err);
                 statusText.innerText = "Xatolik: Mikrofon rad etildi.";
-                statusText.style.color = "var(--danger)";
+                statusText.classList.add('error');
             }
         }
 
         function setupPeer() {
+            const statusText = document.getElementById('status-text');
             const peerId = `debate_${matchId}_${role}`;
-            peer = new Peer(peerId, {
-                debug: 1
-            });
+            peer = new Peer(peerId, { debug: 1 });
 
-            peer.on('open', (id) => {
-                if (role === 'B') {
-                    tryCall(0);
-                }
+            peer.on('open', () => {
+                if (role === 'B') tryCall(0);
             });
 
             peer.on('call', (call) => {
@@ -601,68 +996,72 @@
 
             peer.on('error', (err) => {
                 console.error("PeerJS Error:", err.type, err);
-                if (err.type === 'peer-unavailable') {
-                    statusText.innerText = role === 'B' ? "Raqib hali ulanmadi. Qayta urinilmoqda..." : "Raqib ulanishdan uzildi.";
-                } else if (err.type === 'browser-incompatible') {
-                    statusText.innerText = "Brauzer WebRTCni qo'llab-quvvatlamaydi.";
-                } else if (err.type === 'network') {
-                    statusText.innerText = "Internetda uzilish aniqlandi.";
-                } else {
-                    statusText.innerText = `Ulanish xatosi: ${err.type}`;
-                }
-                statusText.style.color = "var(--danger)";
+                const msgs = {
+                    'peer-unavailable': role === 'B' ? "Raqib hali ulanmadi. Qayta urinilmoqda..." : "Raqib ulanmadi.",
+                    'browser-incompatible': "Brauzer WebRTC-ni qo'llab-quvvatlamaydi.",
+                    'network': "Internet aloqasida uzilish."
+                };
+                statusText.innerText = msgs[err.type] || `Ulanish xatosi: ${err.type}`;
+                statusText.classList.add('error');
             });
         }
 
         function tryCall(attempt) {
-            if (attempt > 30) { // Orqaroq vaqt beramiz
+            const statusText = document.getElementById('status-text');
+            const liveBadge = document.getElementById('live-badge');
+            if (attempt > 30) {
                 statusText.innerText = "Raqib topilmadi. Qayta urinib ko'ring.";
                 return;
             }
-
             const call = peer.call(`debate_${matchId}_A`, localStream);
             if (call) {
                 handleCall(call);
                 setTimeout(() => {
-                    if (!connStatus.classList.contains('active')) {
-                        tryCall(attempt + 1);
-                    }
+                    if (!liveBadge.classList.contains('show')) tryCall(attempt + 1);
                 }, 4000);
             }
         }
 
         function handleCall(call) {
+            const statusText = document.getElementById('status-text');
+            const liveBadge = document.getElementById('live-badge');
+            const remoteAudio = document.getElementById('remote-audio');
+
             call.on('stream', (stream) => {
                 remoteAudio.srcObject = stream;
-                remoteAudio.play().then(() => {
-                    statusText.innerText = "Suhbat faol. Gapiring!";
-                    connStatus.classList.add('active');
-                }).catch(err => {
-                    statusText.innerText = "Audio ruxsatini bosing.";
-                    document.body.onclick = () => remoteAudio.play();
-                });
+                remoteAudio.play()
+                    .then(() => {
+                        statusText.innerText = "Suhbat faol — gapiring!";
+                        statusText.classList.remove('error');
+                        liveBadge.classList.add('show');
+                    })
+                    .catch(() => {
+                        statusText.innerText = "Bosing, audio faollashadi.";
+                        document.body.onclick = () => remoteAudio.play();
+                    });
             });
 
             call.on('close', () => {
                 statusText.innerText = "Debat yakunlandi.";
-                connStatus.classList.remove('active');
+                liveBadge.classList.remove('show');
             });
         }
 
         function toggleMute() {
+            if (!localStream) return;
             isMuted = !isMuted;
             localStream.getAudioTracks()[0].enabled = !isMuted;
-            muteBtn.classList.toggle('secondary');
-            if (isMuted) {
-                muteIcon.innerText = "🔇";
-                muteText.innerText = "Unmute";
-            } else {
-                muteIcon.innerText = "🎤";
-                muteText.innerText = "Mute";
-            }
+            const muteBtn = document.getElementById('mute-btn');
+            const muteIcon = document.getElementById('mute-icon');
+            const muteText = document.getElementById('mute-text');
+            muteIcon.innerText = isMuted ? "🔇" : "🎤";
+            muteText.innerText = isMuted ? "Unmute" : "Mute";
+            muteBtn.classList.toggle('btn-danger', isMuted);
+            muteBtn.classList.toggle('btn-secondary', !isMuted);
         }
 
         function setupVisualizer(stream) {
+            const bars = document.querySelectorAll('#visualizer .bar');
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioContext.createAnalyser();
             const source = audioContext.createMediaStreamSource(stream);
@@ -675,8 +1074,9 @@
                 analyser.getByteFrequencyData(dataArray);
                 bars.forEach((bar, i) => {
                     if (bar) {
-                        const height = (dataArray[i] / 255) * 40;
+                        const height = (dataArray[i] / 255) * 36;
                         bar.style.height = `${Math.max(4, height)}px`;
+                        bar.style.animation = 'none';
                     }
                 });
                 requestAnimationFrame(update);
