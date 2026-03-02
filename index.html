@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Talk Clash - Premium Debate</title>
+    <title>Talk Clash — Jonli Debat</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
@@ -14,17 +14,19 @@
             --primary: #6366f1;
             --primary-light: #818cf8;
             --primary-dark: #4338ca;
+            --primary-glow: rgba(99, 102, 241, 0.4);
             --accent: #f59e0b;
             --accent-light: #fcd34d;
             --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.4);
             --danger: #ef4444;
             --danger-dark: #b91c1c;
-            --bg: #0a0a1a;
-            --bg2: #0f0f2a;
-            --card: rgba(255, 255, 255, 0.04);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --glass: rgba(255, 255, 255, 0.06);
-            --glass-border: rgba(255, 255, 255, 0.12);
+            --bg: #06061a;
+            --bg2: #0c0c2e;
+            --card: rgba(255, 255, 255, 0.035);
+            --card-border: rgba(255, 255, 255, 0.07);
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
             --text: #f1f5f9;
             --text-dim: #94a3b8;
             --text-muted: #64748b;
@@ -50,32 +52,44 @@
         body::before {
             content: '';
             position: fixed;
-            top: -50%;
-            right: -30%;
-            width: 80vw;
-            height: 80vw;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+            top: -40%;
+            right: -20%;
+            width: 70vw;
+            height: 70vw;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
             pointer-events: none;
             z-index: 0;
+            animation: floatGlow 8s ease-in-out infinite alternate;
         }
 
         body::after {
             content: '';
             position: fixed;
-            bottom: -30%;
-            left: -20%;
-            width: 70vw;
-            height: 70vw;
-            background: radial-gradient(circle, rgba(245, 158, 11, 0.06) 0%, transparent 70%);
+            bottom: -20%;
+            left: -15%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.05) 0%, transparent 70%);
             pointer-events: none;
             z-index: 0;
+            animation: floatGlow 10s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes floatGlow {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate(20px, -20px) scale(1.1);
+            }
         }
 
         .container {
             width: 100%;
-            max-width: 430px;
+            max-width: 420px;
             margin: 0 auto;
-            padding: 20px 16px 30px;
+            padding: 16px 16px 30px;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -86,22 +100,22 @@
         /* ===== HEADER ===== */
         .header {
             text-align: center;
-            padding: 16px 0 28px;
-            animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 12px 0 24px;
+            animation: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .logo-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
-            border: 1px solid rgba(99, 102, 241, 0.3);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+            border: 1px solid rgba(99, 102, 241, 0.25);
             border-radius: 100px;
-            padding: 6px 16px;
-            margin-bottom: 14px;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 1.5px;
+            padding: 5px 14px;
+            margin-bottom: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
             text-transform: uppercase;
             color: var(--primary-light);
         }
@@ -111,55 +125,55 @@
             height: 6px;
             background: var(--success);
             border-radius: 50%;
-            box-shadow: 0 0 8px var(--success);
+            box-shadow: 0 0 10px var(--success);
             animation: breathe 2s infinite;
         }
 
         .header h1 {
-            font-size: 36px;
+            font-size: 34px;
             font-weight: 900;
-            margin: 0 0 6px;
+            margin: 0 0 4px;
             background: linear-gradient(135deg, #fff 0%, var(--primary-light) 50%, var(--accent) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -1.5px;
-            line-height: 1;
+            line-height: 1.1;
         }
 
         .header p {
             color: var(--text-muted);
             margin: 0;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 400;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
         }
 
         /* ===== SCREENS ===== */
         .screen {
             display: none;
             width: 100%;
-            animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             flex: 1;
         }
 
         .screen.active {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 14px;
         }
 
         /* ===== CARDS ===== */
         .card {
             background: var(--card);
             border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 28px 20px;
+            border-radius: 22px;
+            padding: 24px 18px;
             text-align: center;
             position: relative;
             overflow: hidden;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
         }
 
         .card::before {
@@ -169,32 +183,32 @@
             left: 0;
             right: 0;
             height: 1px;
-            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
         }
 
         .card-icon {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border-radius: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), #7c3aed);
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
-            margin: 0 auto 16px;
-            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.35);
+            font-size: 26px;
+            margin: 0 auto 14px;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
         }
 
         .card h2 {
-            margin: 0 0 8px;
-            font-size: 20px;
+            margin: 0 0 6px;
+            font-size: 19px;
             font-weight: 700;
             color: var(--text);
         }
 
         .card p {
             margin: 0;
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-dim);
             line-height: 1.5;
         }
@@ -204,17 +218,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
-            margin: 16px 0 8px;
-            height: 36px;
+            gap: 4px;
+            margin: 14px 0 6px;
+            height: 34px;
         }
 
         .bar {
             width: 3px;
-            height: 10px;
+            height: 8px;
             background: linear-gradient(to top, var(--primary), var(--primary-light));
             border-radius: 2px;
-            transition: height 0.1s ease;
+            transition: height 0.08s ease;
             animation: idleBar 2s ease-in-out infinite;
         }
 
@@ -223,11 +237,11 @@
         }
 
         .bar:nth-child(2) {
-            animation-delay: 0.2s;
+            animation-delay: 0.15s;
         }
 
         .bar:nth-child(3) {
-            animation-delay: 0.4s;
+            animation-delay: 0.3s;
         }
 
         .bar:nth-child(4) {
@@ -235,19 +249,19 @@
         }
 
         .bar:nth-child(5) {
-            animation-delay: 0.3s;
+            animation-delay: 0.25s;
         }
 
         @keyframes idleBar {
 
             0%,
             100% {
-                height: 6px;
-                opacity: 0.4;
+                height: 5px;
+                opacity: 0.35;
             }
 
             50% {
-                height: 20px;
+                height: 22px;
                 opacity: 1;
             }
         }
@@ -264,15 +278,14 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            padding: 17px 20px;
+            padding: 16px 20px;
             border-radius: 16px;
             border: none;
             font-family: 'Inter', sans-serif;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            text-decoration: none;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
             overflow: hidden;
             width: 100%;
@@ -284,67 +297,40 @@
             line-height: 1;
         }
 
-        .btn::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: rgba(255, 255, 255, 0);
-            transition: background 0.2s;
-        }
-
-        .btn:active::after {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
         .btn:active {
             transform: scale(0.97);
         }
 
         .btn:disabled {
-            opacity: 0.45;
+            opacity: 0.4;
             cursor: not-allowed;
             transform: none !important;
         }
 
-        /* Primary */
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
             color: #fff;
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35), 0 1px 0 rgba(255, 255, 255, 0.15) inset;
+            box-shadow: 0 8px 28px rgba(99, 102, 241, 0.35), 0 1px 0 rgba(255, 255, 255, 0.15) inset;
         }
 
-        .btn-primary:hover {
-            box-shadow: 0 12px 35px rgba(99, 102, 241, 0.5);
-            transform: translateY(-1px);
-        }
-
-        /* Secondary */
         .btn-secondary {
             background: var(--glass);
             border: 1px solid var(--glass-border);
             color: var(--text);
         }
 
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        /* Accent */
         .btn-accent {
             background: linear-gradient(135deg, var(--accent) 0%, #d97706 100%);
             color: #0a0a1a;
             box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
         }
 
-        /* Danger */
         .btn-danger {
             background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
             color: #fff;
             box-shadow: 0 8px 25px rgba(239, 68, 68, 0.25);
         }
 
-        /* Ghost */
         .btn-ghost {
             background: transparent;
             border: 1px solid var(--card-border);
@@ -356,13 +342,13 @@
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 7px;
+            gap: 6px;
         }
 
         .form-label {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
-            letter-spacing: 0.8px;
+            letter-spacing: 1px;
             text-transform: uppercase;
             color: var(--text-muted);
         }
@@ -388,20 +374,20 @@
 
         .input-field:focus {
             border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.08);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+            background: rgba(99, 102, 241, 0.06);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        /* ===== WAITING SCREEN ===== */
+        /* ===== WAITING ===== */
         .waiting-ring {
-            width: 80px;
-            height: 80px;
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
             border: 3px solid var(--card-border);
             border-top: 3px solid var(--primary);
             border-right: 3px solid var(--primary-light);
-            animation: spin 1.2s linear infinite;
-            margin: 0 auto 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 18px;
         }
 
         @keyframes spin {
@@ -411,46 +397,46 @@
         }
 
         .room-code-display {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
-            border: 1px solid rgba(99, 102, 241, 0.25);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.12));
+            border: 1px solid rgba(99, 102, 241, 0.2);
             border-radius: 16px;
-            padding: 14px 20px;
-            margin: 0 auto 8px;
+            padding: 12px 20px;
+            margin: 0 auto;
             display: inline-block;
         }
 
         .room-code-display .code-label {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
             color: var(--text-muted);
             margin-bottom: 4px;
         }
 
         .room-code-display .code-value {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 800;
             color: var(--primary-light);
-            letter-spacing: 4px;
+            letter-spacing: 6px;
         }
 
-        /* ===== LIVE DEBATE ===== */
+        /* ===== LIVE BADGE ===== */
         .live-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
             background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.25);
+            border: 1px solid rgba(239, 68, 68, 0.2);
             border-radius: 100px;
-            padding: 5px 12px;
-            font-size: 11px;
+            padding: 4px 12px;
+            font-size: 10px;
             font-weight: 700;
-            letter-spacing: 1.2px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
             color: var(--danger);
             opacity: 0;
-            transform: translateY(8px);
+            transform: translateY(6px);
             transition: all 0.3s ease;
         }
 
@@ -460,8 +446,8 @@
         }
 
         .live-dot {
-            width: 7px;
-            height: 7px;
+            width: 6px;
+            height: 6px;
             background: var(--danger);
             border-radius: 50%;
             box-shadow: 0 0 8px var(--danger);
@@ -469,59 +455,32 @@
         }
 
         .timer-display {
-            font-size: 60px;
+            font-size: 56px;
             font-weight: 900;
             letter-spacing: -3px;
-            margin: 10px 0;
+            margin: 8px 0;
             background: linear-gradient(135deg, #fff, var(--primary-light));
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        /* ===== ACHIEVEMENTS ===== */
-        .achievements {
-            background: var(--card);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 16px 18px;
-            margin-top: auto;
-        }
-
-        .achievements-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 8px;
-            letter-spacing: 0.3px;
-        }
-
-        .achievements p {
-            margin: 0;
-            font-size: 12px;
-            color: var(--text-muted);
-            line-height: 1.6;
-        }
-
         /* ===== INFO BOX ===== */
         .info-box {
-            background: rgba(16, 185, 129, 0.08);
-            border: 1px solid rgba(16, 185, 129, 0.2);
+            background: rgba(16, 185, 129, 0.06);
+            border: 1px solid rgba(16, 185, 129, 0.15);
             border-radius: 14px;
-            padding: 12px 16px;
-            font-size: 13px;
+            padding: 12px 14px;
+            font-size: 12px;
             color: #6ee7b7;
             line-height: 1.5;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: flex-start;
         }
 
         .info-box-icon {
-            font-size: 16px;
+            font-size: 14px;
             flex-shrink: 0;
             margin-top: 1px;
         }
@@ -532,7 +491,7 @@
             align-items: center;
             gap: 12px;
             color: var(--text-muted);
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .divider::before,
@@ -545,21 +504,47 @@
 
         /* ===== CONTROLS ===== */
         .controls-grid {
-            display: grid;
+            display: none;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            display: none;
         }
 
         .controls-grid.show {
             display: grid;
         }
 
+        .controls-grid .btn {
+            flex-direction: column;
+            gap: 4px;
+            padding: 14px 10px;
+            font-size: 12px;
+        }
+
+        .controls-grid .btn .btn-icon {
+            font-size: 22px;
+        }
+
+        /* ===== STATUS ===== */
+        .status-text {
+            font-size: 14px;
+            color: var(--text-dim);
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        .status-text.error {
+            color: var(--danger);
+        }
+
+        .status-text.success {
+            color: var(--success);
+        }
+
         /* ===== ANIMATIONS ===== */
         @keyframes fadeUp {
             from {
                 opacity: 0;
-                transform: translateY(16px);
+                transform: translateY(14px);
             }
 
             to {
@@ -571,7 +556,7 @@
         @keyframes slideDown {
             from {
                 opacity: 0;
-                transform: translateY(-16px);
+                transform: translateY(-14px);
             }
 
             to {
@@ -594,49 +579,52 @@
             }
         }
 
-        @keyframes pulse-ring {
-            0% {
-                transform: scale(0.9);
-                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
-            }
-
-            70% {
-                transform: scale(1);
-                box-shadow: 0 0 0 20px rgba(99, 102, 241, 0);
-            }
-
-            100% {
-                transform: scale(0.9);
-                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
-            }
-        }
-
         #remote-audio {
             display: none;
         }
 
-        /* Status text */
-        .status-text {
-            font-size: 15px;
-            color: var(--text-dim);
-            font-weight: 400;
-            line-height: 1.5;
+        /* ===== SEARCH ANIMATION ===== */
+        .search-anim {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin: 12px 0;
         }
 
-        .status-text.error {
-            color: var(--danger);
+        .search-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: searchBounce 1.4s ease-in-out infinite;
         }
 
-        /* Control button labels */
-        .controls-grid .btn {
-            flex-direction: column;
-            gap: 5px;
-            padding: 14px 10px;
-            font-size: 13px;
+        .search-dot:nth-child(1) {
+            animation-delay: 0s;
         }
 
-        .controls-grid .btn .btn-icon {
-            font-size: 22px;
+        .search-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .search-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes searchBounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0.6);
+                opacity: 0.3;
+            }
+
+            40% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -649,7 +637,7 @@
                 Talk Clash
             </div>
             <h1>Debate Live</h1>
-            <p>Real-time voice debate platform</p>
+            <p>Jonli ovozli debat platformasi</p>
         </div>
 
         <!-- ===== MAIN SCREEN ===== -->
@@ -667,7 +655,7 @@
                 </div>
             </div>
             <div class="btn-group">
-                <button class="btn btn-primary" onclick="startSearch()">
+                <button class="btn btn-primary" id="btn-random" onclick="startSearch()">
                     <span class="btn-icon">🚀</span>
                     Tasodifiy raqib topish
                 </button>
@@ -678,12 +666,32 @@
             </div>
         </div>
 
-        <!-- ===== ROOM CHOICE SCREEN ===== -->
+        <!-- ===== SEARCHING SCREEN ===== -->
+        <div id="screen-searching" class="screen">
+            <div class="card">
+                <div class="waiting-ring"></div>
+                <h2>Raqib qidirilmoqda...</h2>
+                <p class="status-text" id="search-status">Navbatga qo'shildingiz. Raqib kutilmoqda...</p>
+                <div class="search-anim">
+                    <div class="search-dot"></div>
+                    <div class="search-dot"></div>
+                    <div class="search-dot"></div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="cancelSearch()">
+                    <span class="btn-icon">✖</span>
+                    Bekor qilish
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== ROOM CHOICE ===== -->
         <div id="screen-room-choice" class="screen">
             <div class="card">
                 <div class="card-icon">🔐</div>
                 <h2>Private Komnata</h2>
-                <p>Do'stingiz bilan yakkama-yakka debat o'tkazing</p>
+                <p>Do'stingiz bilan yakkama-yakka debat</p>
             </div>
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="showScreen('screen-create-room')">
@@ -701,7 +709,7 @@
             </div>
         </div>
 
-        <!-- ===== CREATE ROOM SCREEN ===== -->
+        <!-- ===== CREATE ROOM ===== -->
         <div id="screen-create-room" class="screen">
             <div class="card">
                 <div class="card-icon">✨</div>
@@ -732,19 +740,19 @@
             </div>
         </div>
 
-        <!-- ===== WAITING FOR OPPONENT (after create room) ===== -->
+        <!-- ===== WAITING FOR OPPONENT ===== -->
         <div id="screen-waiting-room" class="screen">
             <div class="card">
                 <div class="waiting-ring"></div>
                 <h2>Raqib kutilmoqda...</h2>
                 <p id="waiting-room-name" class="status-text">Komnatangiz tayyor!</p>
-                <div style="margin-top: 16px;">
+                <div style="margin-top: 14px;">
                     <div class="room-code-display">
                         <div class="code-label">Komnata kodi</div>
                         <div class="code-value" id="waiting-room-code">—</div>
                     </div>
                 </div>
-                <p style="margin-top: 12px; font-size: 13px; color: var(--text-muted);">
+                <p style="margin-top: 10px; font-size: 12px; color: var(--text-muted);">
                     Raqibingiz ushbu kodni kiritishi bilan debat avtomatik boshlanadi
                 </p>
             </div>
@@ -756,7 +764,7 @@
             </div>
         </div>
 
-        <!-- ===== JOIN ROOM SCREEN ===== -->
+        <!-- ===== JOIN ROOM ===== -->
         <div id="screen-join-room" class="screen">
             <div class="card">
                 <div class="card-icon">🔑</div>
@@ -772,7 +780,7 @@
                 <input type="text" id="join-code" class="input-field" placeholder="Kodni kiriting..." maxlength="10">
             </div>
             <div class="btn-group">
-                <button class="btn btn-primary" onclick="handleJoinRoom()">
+                <button class="btn btn-primary" id="btn-join" onclick="handleJoinRoom()">
                     <span class="btn-icon">🚀</span>
                     Kirish
                 </button>
@@ -783,16 +791,16 @@
             </div>
         </div>
 
-        <!-- ===== ACTIVE DEBATE SCREEN ===== -->
+        <!-- ===== ACTIVE DEBATE ===== -->
         <div id="screen-active" class="screen">
             <div class="card">
-                <p class="status-text" id="status-text">Tayyormisiz?</p>
-                <div class="timer-display" id="timer-display">02:00</div>
+                <p class="status-text" id="status-text">Ulanmoqda...</p>
+                <div class="timer-display" id="timer-display">00:00</div>
                 <div class="live-badge" id="live-badge">
                     <span class="live-dot"></span>
-                    JONLI
+                    JONLI EFIR
                 </div>
-                <div class="visualizer" id="visualizer" style="margin-top: 14px;">
+                <div class="visualizer" id="visualizer" style="margin-top: 12px;">
                     <div class="bar"></div>
                     <div class="bar"></div>
                     <div class="bar"></div>
@@ -806,268 +814,259 @@
                         <span id="mute-icon" class="btn-icon">🎤</span>
                         <span id="mute-text">Mute</span>
                     </button>
-                    <button class="btn btn-danger" onclick="location.reload()">
+                    <button class="btn btn-danger" onclick="endDebate()">
                         <span class="btn-icon">🛑</span>
                         Tugatish
                     </button>
                 </div>
             </div>
         </div>
-
-        <!-- ===== ACHIEVEMENTS ===== -->
-        <div class="achievements" style="margin-top: 20px;">
-            <div class="achievements-header">
-                🏆 Mening yutuqlarim
-            </div>
-            <p id="awards-list">Hozircha yutuqlar yo'q. Debatda qatnashing!</p>
-        </div>
     </div>
 
     <audio id="remote-audio" autoplay playsinline></audio>
 
     <script>
-        // ===== CONFIG =====
-        // Server manzili — lokal yoki deploy qilingan
-        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:8000'
-            : 'https://your-server.onrender.com'; // Deploy qilganda o'zgartiring
+        // ===== TELEGRAM & USER ID =====
+        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg) { tg.expand(); tg.ready(); }
 
-        // ===== TELEGRAM WEBAPP SETUP =====
-        let tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg) {
-            tg.expand();
-            tg.ready();
-        }
-
-        // Foydalanuvchi ID — Telegram'dan yoki random
         const userId = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user)
             ? String(tg.initDataUnsafe.user.id)
             : 'test_' + Math.random().toString(36).substring(2, 10);
 
-        console.log('User ID:', userId);
+        console.log('👤 User ID:', userId);
 
-        // Helper: alert
         function showAlert(msg) {
-            if (tg && tg.showAlert) {
-                tg.showAlert(msg);
-            } else {
-                alert(msg);
-            }
+            if (tg && tg.showAlert) tg.showAlert(msg);
+            else alert(msg);
         }
 
-        // Helper: API so'rov
-        async function apiCall(endpoint, body) {
+        // ===== API HELPER =====
+        // Same-origin server — no CORS, relative URL
+        async function api(endpoint, body = {}) {
             try {
-                const res = await fetch(`${API_BASE}${endpoint}`, {
+                const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: userId, ...body })
                 });
                 return await res.json();
             } catch (err) {
-                console.error('API error:', err);
-                return { status: 'error', message: 'Serverga ulanib bo\'lmadi. Internet tekshiring.' };
+                console.error('❌ API:', err);
+                return { status: 'error', message: 'Serverga ulanib bo\'lmadi!' };
             }
         }
 
-        // ===== URL PARAMS (for live debate) =====
-        const urlParams = new URLSearchParams(window.location.search);
-        let matchId = urlParams.get('match_id');
-        let role = urlParams.get('role');
-
         // ===== GLOBALS =====
+        let matchId = null;
+        let role = null;
         let peer = null;
         let localStream = null;
         let isMuted = false;
         let audioContext, analyser, dataArray;
         let activeRoomCode = null;
-        let searchPollTimer = null;
-        let roomPollTimer = null;
+        let pollTimer = null;
+        let debateSeconds = 0;
+        let debateTimer = null;
 
-        // ===== SCREEN NAVIGATION =====
-        function showScreen(screenId) {
+        // ===== NAVIGATION =====
+        function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
+            document.getElementById(id).classList.add('active');
         }
 
-        // Auto-enter debate if URL has match params
-        if (matchId && role) {
-            showScreen('screen-active');
-            initLiveDebate();
+        function stopPolling() {
+            if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
         }
 
-        // ===== Helper: Debatga kirish =====
+        // ===== ENTER DEBATE =====
         function enterDebate(data) {
-            // Polling larni to'xtatish
-            stopAllPolling();
-
+            stopPolling();
             matchId = data.match_id;
             role = data.role;
-
+            console.log('🎯 Matched!', matchId, role, data.opponent_name);
             showScreen('screen-active');
             document.getElementById('status-text').innerText = `Raqib: ${data.opponent_name || 'Topildi'}! Ulanmoqda...`;
             initLiveDebate();
         }
 
-        function stopAllPolling() {
-            if (searchPollTimer) { clearInterval(searchPollTimer); searchPollTimer = null; }
-            if (roomPollTimer) { clearInterval(roomPollTimer); roomPollTimer = null; }
-        }
-
-        // ===== RANDOM SEARCH =====
+        // ================================================
+        // RANDOM SEARCH
+        // ================================================
         async function startSearch() {
-            const statusText = document.getElementById('status-text-main');
-            statusText.innerText = "Raqib qidirilmoqda... ⏳";
+            showScreen('screen-searching');
+            const el = document.getElementById('search-status');
+            el.innerText = "Serverga ulanmoqda...";
 
-            const result = await apiCall('/api/search', { name: 'Foydalanuvchi' });
-            console.log('Search result:', result);
+            const res = await api('/api/search', { name: getUserName() });
+            console.log('🔍 Search:', res);
 
-            if (result.status === 'matched') {
-                // Darhol raqib topildi!
-                enterDebate(result);
-            } else if (result.status === 'waiting') {
-                statusText.innerText = "Navbatdasiz. Raqib kutilmoqda... ⏳";
-                // Polling boshlash — har 2 sekundda tekshirish
-                searchPollTimer = setInterval(async () => {
-                    const check = await apiCall('/api/check-match', {});
-                    console.log('Poll check:', check);
-                    if (check.status === 'matched') {
-                        enterDebate(check);
-                    }
+            if (res.status === 'matched') {
+                enterDebate(res);
+            } else if (res.status === 'waiting') {
+                el.innerText = "Navbatdasiz. Raqib kutilmoqda...";
+                pollTimer = setInterval(async () => {
+                    const check = await api('/api/check-match');
+                    if (check.status === 'matched') enterDebate(check);
                 }, 2000);
             } else {
-                statusText.innerText = result.message || "Xatolik yuz berdi.";
+                el.innerText = res.message || "Xatolik!";
             }
         }
 
-        // ===== CREATE ROOM =====
+        async function cancelSearch() {
+            stopPolling();
+            await api('/api/cancel-search');
+            showScreen('screen-main');
+            document.getElementById('status-text-main').innerText = "Quyidagi usuldan birini tanlang";
+        }
+
+        function getUserName() {
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                const u = tg.initDataUnsafe.user;
+                return u.first_name + (u.last_name ? ' ' + u.last_name : '');
+            }
+            return 'Foydalanuvchi';
+        }
+
+        // ================================================
+        // CREATE ROOM
+        // ================================================
         async function handleCreateRoom() {
             const name = document.getElementById('create-name').value.trim();
             const code = document.getElementById('create-code').value.trim();
+            if (!name) { showAlert("Ismingizni kiriting!"); return; }
+            if (!code) { showAlert("Komnata kodini kiriting!"); return; }
 
-            if (!name) { showAlert("Iltimos, ismingizni kiriting!"); return; }
-            if (!code) { showAlert("Iltimos, komnata kodini kiriting!"); return; }
+            const res = await api('/api/create-room', { name, code });
+            console.log('🏠 Create room:', res);
 
-            const result = await apiCall('/api/create-room', { name, code });
-            console.log('Create room result:', result);
-
-            if (result.status === 'ok') {
+            if (res.status === 'ok') {
                 activeRoomCode = code;
                 document.getElementById('waiting-room-code').innerText = code;
                 document.getElementById('waiting-room-name').innerText = `Salom, ${name}! Raqib kutilmoqda...`;
                 showScreen('screen-waiting-room');
 
-                // Polling — raqib kirishini kutish
-                roomPollTimer = setInterval(async () => {
-                    const check = await apiCall('/api/check-room', { code });
-                    console.log('Room poll:', check);
-                    if (check.status === 'matched') {
-                        enterDebate(check);
-                    }
+                pollTimer = setInterval(async () => {
+                    const check = await api('/api/check-room', { code });
+                    if (check.status === 'matched') enterDebate(check);
                 }, 2000);
             } else {
-                showAlert(result.message || "Komnata yaratib bo'lmadi.");
+                showAlert(res.message || "Komnata yaratib bo'lmadi!");
             }
         }
 
-        // ===== CANCEL ROOM =====
+        // ================================================
+        // CANCEL ROOM
+        // ================================================
         async function cancelRoom() {
-            stopAllPolling();
+            stopPolling();
             if (activeRoomCode) {
-                await apiCall('/api/cancel-room', { code: activeRoomCode });
+                await api('/api/cancel-room', { code: activeRoomCode });
                 activeRoomCode = null;
             }
             showScreen('screen-room-choice');
         }
 
-        // ===== JOIN ROOM =====
+        // ================================================
+        // JOIN ROOM
+        // ================================================
         async function handleJoinRoom() {
             const name = document.getElementById('join-name').value.trim();
             const code = document.getElementById('join-code').value.trim();
+            if (!name) { showAlert("Ismingizni kiriting!"); return; }
+            if (!code) { showAlert("Komnata kodini kiriting!"); return; }
 
-            if (!name) { showAlert("Iltimos, ismingizni kiriting!"); return; }
-            if (!code) { showAlert("Iltimos, komnata kodini kiriting!"); return; }
+            const btn = document.getElementById('btn-join');
+            btn.disabled = true;
+            btn.querySelector('.btn-icon').innerText = '⏳';
 
-            const result = await apiCall('/api/join-room', { name, code });
-            console.log('Join room result:', result);
+            const res = await api('/api/join-room', { name, code });
+            console.log('🔑 Join room:', res);
 
-            if (result.status === 'matched') {
-                // Muvaffaqiyatli! Debatga kirish
-                enterDebate(result);
+            btn.disabled = false;
+            btn.querySelector('.btn-icon').innerText = '🚀';
+
+            if (res.status === 'matched') {
+                enterDebate(res);
             } else {
-                showAlert(result.message || "Komnataga kirib bo'lmadi.");
+                showAlert(res.message || "Komnataga kirib bo'lmadi!");
             }
         }
 
-        // ===== LIVE DEBATE =====
+        // ================================================
+        // LIVE DEBATE (PeerJS)
+        // ================================================
         async function initLiveDebate() {
             const controls = document.getElementById('controls');
             const statusText = document.getElementById('status-text');
             controls.classList.add('show');
-            statusText.innerText = "Mikrofon ruxsati so'ralmoqda...";
 
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true,
-                        sampleRate: 48000
-                    }
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
                 });
-
-                statusText.innerText = "Bog'lanish kutilmoqda...";
+                statusText.innerText = "Mikrofon tayyor! Raqibga ulanmoqda...";
                 setupVisualizer(localStream);
                 setupPeer();
             } catch (err) {
                 console.error(err);
-                statusText.innerText = "Xatolik: Mikrofon rad etildi.";
+                statusText.innerText = "❌ Mikrofon ruxsati berilmadi!";
                 statusText.classList.add('error');
             }
         }
 
         function setupPeer() {
             const statusText = document.getElementById('status-text');
-            const peerId = `debate_${matchId}_${role}`;
-            peer = new Peer(peerId, { debug: 1 });
+            const peerId = `tc_${matchId}_${role}`;
+            console.log('🔗 Peer ID:', peerId);
+
+            peer = new Peer(peerId, { debug: 0 });
 
             peer.on('open', () => {
-                console.log('Peer opened with ID:', peerId);
+                console.log('✅ Peer connected');
                 if (role === 'B') tryCall(0);
+                else statusText.innerText = "Raqibning ulanishi kutilmoqda...";
             });
 
             peer.on('call', (call) => {
-                console.log('Incoming call received');
+                console.log('📞 Incoming call!');
                 call.answer(localStream);
                 handleCall(call);
             });
 
             peer.on('error', (err) => {
-                console.error("PeerJS Error:", err.type, err);
-                const msgs = {
-                    'peer-unavailable': role === 'B' ? "Raqib hali ulanmadi. Qayta urinilmoqda..." : "Raqib ulanmadi.",
-                    'browser-incompatible': "Brauzer WebRTC-ni qo'llab-quvvatlamaydi.",
-                    'network': "Internet aloqasida uzilish."
-                };
-                statusText.innerText = msgs[err.type] || `Ulanish xatosi: ${err.type}`;
-                statusText.classList.add('error');
+                console.warn('PeerJS:', err.type);
+                if (err.type === 'peer-unavailable' && role === 'B') {
+                    // tryCall handles retries
+                } else if (err.type === 'unavailable-id') {
+                    statusText.innerText = "Sessiya allaqachon ochiq. Sahifani yangilang.";
+                    statusText.classList.add('error');
+                }
             });
         }
 
         function tryCall(attempt) {
             const statusText = document.getElementById('status-text');
             const liveBadge = document.getElementById('live-badge');
-            if (attempt > 30) {
-                statusText.innerText = "Raqib topilmadi. Qayta urinib ko'ring.";
+
+            if (attempt > 25) {
+                statusText.innerText = "Raqib ulanmadi. Qayta urinib ko'ring.";
+                statusText.classList.add('error');
                 return;
             }
-            statusText.innerText = `Raqibga ulanmoqda... (${attempt + 1}/30)`;
-            const call = peer.call(`debate_${matchId}_A`, localStream);
+
+            statusText.innerText = `Raqibga ulanmoqda... (${attempt + 1})`;
+            const targetId = `tc_${matchId}_A`;
+            const call = peer.call(targetId, localStream);
+
             if (call) {
                 handleCall(call);
                 setTimeout(() => {
                     if (!liveBadge.classList.contains('show')) tryCall(attempt + 1);
-                }, 4000);
+                }, 3000);
+            } else {
+                setTimeout(() => tryCall(attempt + 1), 3000);
             }
         }
 
@@ -1080,57 +1079,83 @@
                 remoteAudio.srcObject = stream;
                 remoteAudio.play()
                     .then(() => {
-                        statusText.innerText = "Suhbat faol — gapiring!";
+                        statusText.innerText = "🎤 Suhbat faol — gapiring!";
                         statusText.classList.remove('error');
+                        statusText.classList.add('success');
                         liveBadge.classList.add('show');
+                        startDebateTimer();
                     })
                     .catch(() => {
-                        statusText.innerText = "Bosing, audio faollashadi.";
-                        document.body.onclick = () => remoteAudio.play();
+                        statusText.innerText = "Ekranga bosing — audio yoqiladi";
+                        document.body.onclick = () => {
+                            remoteAudio.play();
+                            document.body.onclick = null;
+                        };
                     });
             });
 
             call.on('close', () => {
                 statusText.innerText = "Debat yakunlandi.";
                 liveBadge.classList.remove('show');
+                stopDebateTimer();
             });
         }
 
+        // ===== DEBATE TIMER =====
+        function startDebateTimer() {
+            debateSeconds = 0;
+            const display = document.getElementById('timer-display');
+            debateTimer = setInterval(() => {
+                debateSeconds++;
+                const m = String(Math.floor(debateSeconds / 60)).padStart(2, '0');
+                const s = String(debateSeconds % 60).padStart(2, '0');
+                display.innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function stopDebateTimer() {
+            if (debateTimer) { clearInterval(debateTimer); debateTimer = null; }
+        }
+
+        function endDebate() {
+            stopDebateTimer();
+            stopPolling();
+            if (peer) peer.destroy();
+            if (localStream) localStream.getTracks().forEach(t => t.stop());
+            location.reload();
+        }
+
+        // ===== MUTE =====
         function toggleMute() {
             if (!localStream) return;
             isMuted = !isMuted;
             localStream.getAudioTracks()[0].enabled = !isMuted;
-            const muteBtn = document.getElementById('mute-btn');
-            const muteIcon = document.getElementById('mute-icon');
-            const muteText = document.getElementById('mute-text');
-            muteIcon.innerText = isMuted ? "🔇" : "🎤";
-            muteText.innerText = isMuted ? "Unmute" : "Mute";
-            muteBtn.classList.toggle('btn-danger', isMuted);
-            muteBtn.classList.toggle('btn-secondary', !isMuted);
+            document.getElementById('mute-icon').innerText = isMuted ? "🔇" : "🎤";
+            document.getElementById('mute-text').innerText = isMuted ? "Unmute" : "Mute";
+            const btn = document.getElementById('mute-btn');
+            btn.classList.toggle('btn-danger', isMuted);
+            btn.classList.toggle('btn-secondary', !isMuted);
         }
 
+        // ===== VISUALIZER =====
         function setupVisualizer(stream) {
             const bars = document.querySelectorAll('#visualizer .bar');
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioContext.createAnalyser();
-            const source = audioContext.createMediaStreamSource(stream);
-            source.connect(analyser);
+            audioContext.createMediaStreamSource(stream).connect(analyser);
             analyser.fftSize = 32;
-            const bufferLength = analyser.frequencyBinCount;
-            dataArray = new Uint8Array(bufferLength);
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-            function update() {
+            (function update() {
                 analyser.getByteFrequencyData(dataArray);
                 bars.forEach((bar, i) => {
                     if (bar) {
-                        const height = (dataArray[i] / 255) * 36;
-                        bar.style.height = `${Math.max(4, height)}px`;
+                        bar.style.height = `${Math.max(4, (dataArray[i] / 255) * 36)}px`;
                         bar.style.animation = 'none';
                     }
                 });
                 requestAnimationFrame(update);
-            }
-            update();
+            })();
         }
     </script>
 </body>
