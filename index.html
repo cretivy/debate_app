@@ -37,7 +37,7 @@
             min-height: 100vh;
             margin: 0;
             padding: 20px;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         .container {
@@ -70,6 +70,16 @@
             color: var(--text-dim);
             margin: 5px 0 0;
             font-size: 14px;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .screen.active {
+            display: block;
         }
 
         .status-card {
@@ -165,6 +175,7 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            text-decoration: none;
         }
 
         .btn:active {
@@ -191,19 +202,45 @@
             box-shadow: 0 10px 25px rgba(229, 62, 62, 0.2);
         }
 
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+
+        .input-field {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
         .controls {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-top: 5px;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.5s ease;
+            display: none;
         }
 
         .controls.active {
-            opacity: 1;
-            pointer-events: auto;
+            display: grid;
         }
 
         .visualizer {
@@ -247,6 +284,18 @@
             font-size: 13px;
             color: var(--text-dim);
             line-height: 1.6;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @keyframes pulse {
@@ -303,35 +352,118 @@
             <p>Premium Real-time Debate</p>
         </div>
 
-        <div class="status-card">
-            <p id="status-text">Tayyormisiz? Raqib qidirishni boshlang.</p>
-            <div id="connection-status" class="live-status">
-                <span class="live-dot"></span> LIVE AUDIO
+        <!-- MAIN SCREEN -->
+        <div id="screen-main" class="screen active">
+            <div class="status-card">
+                <p id="status-text-main">Hush kelibsiz! Qanday debatni xohlaysiz?</p>
+                <div class="visualizer">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
             </div>
-
-            <div class="visualizer" id="visualizer">
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
+            <div class="btn-group">
+                <button class="btn" onclick="startSearch()">
+                    <span>🚀</span> Random Match
+                </button>
+                <button class="btn secondary" onclick="showScreen('screen-room-choice')">
+                    <span>🏠</span> Komnata orqali
+                </button>
             </div>
-
-            <div id="timer-display" class="timer">02:00</div>
         </div>
 
-        <div class="btn-group">
-            <button id="main-btn" class="btn" onclick="startSearch()">
-                <span>🚀</span> Start Conversation
-            </button>
+        <!-- ROOM CHOICE SCREEN -->
+        <div id="screen-room-choice" class="screen">
+            <div class="status-card">
+                <p>Private Room tanlang</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn" onclick="showScreen('screen-create-room')">
+                    <span>➕</span> Create Room
+                </button>
+                <button class="btn secondary" onclick="showScreen('screen-join-room')">
+                    <span>🔑</span> Join Room
+                </button>
+                <button class="btn danger" onclick="showScreen('screen-main')">
+                    <span>⬅️</span> Orqaga
+                </button>
+            </div>
+        </div>
 
-            <div class="controls" id="controls">
-                <button id="mute-btn" class="btn secondary" onclick="toggleMute()">
-                    <span id="mute-icon">🎤</span> <span id="mute-text">Mute</span>
+        <!-- CREATE ROOM SCREEN -->
+        <div id="screen-create-room" class="screen">
+            <div class="status-card">
+                <p>Yangi komnata yaratish</p>
+            </div>
+            <div class="form-group">
+                <label>Ism Familiyangiz</label>
+                <input type="text" id="create-name" class="input-field" placeholder="Masalan: Ali Valiev">
+            </div>
+            <div class="form-group">
+                <label>Komnata Kodi</label>
+                <input type="text" id="create-code" class="input-field" placeholder="Masalan: 7777">
+            </div>
+            <div class="btn-group">
+                <button class="btn" onclick="handleCreateRoom()">
+                    <span>✅</span> Create & Start
                 </button>
-                <button id="end-btn" class="btn danger" onclick="location.reload()">
-                    <span>🛑</span> End
+                <button class="btn danger" onclick="showScreen('screen-room-choice')">
+                    <span>⬅️</span> Orqaga
                 </button>
+            </div>
+        </div>
+
+        <!-- JOIN ROOM SCREEN -->
+        <div id="screen-join-room" class="screen">
+            <div class="status-card">
+                <p>Komnataga kirish</p>
+            </div>
+            <div class="form-group">
+                <label>Ism Familiyangiz</label>
+                <input type="text" id="join-name" class="input-field" placeholder="Masalan: G'ani Sherov">
+            </div>
+            <div class="form-group">
+                <label>Komnata Kodi</label>
+                <input type="text" id="join-code" class="input-field" placeholder="Kod kriting...">
+            </div>
+            <div class="btn-group">
+                <button class="btn" onclick="handleJoinRoom()">
+                    <span>🚀</span> Kirish
+                </button>
+                <button class="btn danger" onclick="showScreen('screen-room-choice')">
+                    <span>⬅️</span> Orqaga
+                </button>
+            </div>
+        </div>
+
+        <!-- ACTIVE CHAT SCREEN (OLD STATUS CARD) -->
+        <div id="screen-active" class="screen">
+            <div class="status-card">
+                <p id="status-text">Tayyormisiz?</p>
+                <div id="connection-status" class="live-status">
+                    <span class="live-dot"></span> LIVE AUDIO
+                </div>
+
+                <div class="visualizer" id="visualizer">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+
+                <div id="timer-display" class="timer">02:00</div>
+            </div>
+
+            <div class="btn-group">
+                <div class="controls" id="controls">
+                    <button id="mute-btn" class="btn secondary" onclick="toggleMute()">
+                        <span id="mute-icon">🎤</span> <span id="mute-text">Mute</span>
+                    </button>
+                    <button id="end-btn" class="btn danger" onclick="location.reload()">
+                        <span>🛑</span> End
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -340,6 +472,7 @@
             <p id="awards-list">Hozircha yutuqlar yo'q. Debatda qatnashing va g'olib bo'ling!</p>
         </div>
     </div>
+
 
     <audio id="remote-audio" autoplay playsinline></audio>
 
@@ -353,7 +486,6 @@
         const role = urlParams.get('role');
 
         const statusText = document.getElementById('status-text');
-        const mainBtn = document.getElementById('main-btn');
         const controls = document.getElementById('controls');
         const connStatus = document.getElementById('connection-status');
         const remoteAudio = document.getElementById('remote-audio');
@@ -367,17 +499,70 @@
         let isMuted = false;
         let audioContext, analyser, dataArray;
 
+        // --- UI LOGIC ---
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
         if (matchId && role) {
+            showScreen('screen-active');
             initLiveDebate();
         }
 
+        function handleCreateRoom() {
+            const name = document.getElementById('create-name').value.trim();
+            const code = document.getElementById('create-code').value.trim();
+
+            if (!name || !code) {
+                tg.showAlert("Iltimos, ism va kodni kiriting!");
+                return;
+            }
+
+            const data = {
+                action: "create_room",
+                name: name,
+                code: code
+            };
+
+            tg.sendData(JSON.stringify(data));
+            document.getElementById('status-text-main').innerText = "Komnata yaratilmoqda...";
+            showScreen('screen-main');
+        }
+
+        function handleJoinRoom() {
+            const name = document.getElementById('join-name').value.trim();
+            const code = document.getElementById('join-code').value.trim();
+
+            if (!name || !code) {
+                tg.showAlert("Iltimos, ism va kodni kiriting!");
+                return;
+            }
+
+            const data = {
+                action: "join_room",
+                name: name,
+                code: code
+            };
+
+            tg.sendData(JSON.stringify(data));
+            document.getElementById('status-text-main').innerText = "Komnataga ulanish kutilmoqda...";
+            showScreen('screen-main');
+        }
+
+        function startSearch() {
+            const data = { action: "start_search" };
+            tg.sendData(JSON.stringify(data));
+            document.getElementById('status-text-main').innerText = "Raqib qidirilmoqda...";
+            // setTimeout(() => tg.close(), 500); // O'chirib turamiz test uchun
+        }
+
+        // --- DEBATE LOGIC ---
         async function initLiveDebate() {
-            mainBtn.style.display = 'none';
             controls.classList.add('active');
             statusText.innerText = "Ruxsat kutilmoqda...";
 
             try {
-                // ECHO CANCELLATION va NOISE SUPPRESSION sozlanmalari
                 localStream = await navigator.mediaDevices.getUserMedia({
                     audio: {
                         echoCancellation: true,
@@ -430,7 +615,7 @@
         }
 
         function tryCall(attempt) {
-            if (attempt > 15) {
+            if (attempt > 30) { // Orqaroq vaqt beramiz
                 statusText.innerText = "Raqib topilmadi. Qayta urinib ko'ring.";
                 return;
             }
@@ -489,20 +674,14 @@
             function update() {
                 analyser.getByteFrequencyData(dataArray);
                 bars.forEach((bar, i) => {
-                    const height = (dataArray[i] / 255) * 40;
-                    bar.style.height = `${Math.max(4, height)}px`;
+                    if (bar) {
+                        const height = (dataArray[i] / 255) * 40;
+                        bar.style.height = `${Math.max(4, height)}px`;
+                    }
                 });
                 requestAnimationFrame(update);
             }
             update();
-        }
-
-        function startSearch() {
-            statusText.innerText = "Raqib qidirilmoqda...";
-            mainBtn.innerText = "Navbatda...";
-            mainBtn.disabled = true;
-            tg.sendData("start_search");
-            setTimeout(() => tg.close(), 500);
         }
     </script>
 </body>
