@@ -578,6 +578,29 @@
         .status-text.error {
             color: var(--danger);
         }
+
+        #audio-container {
+            display: none;
+        }
+
+        .select-field {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .select-field option {
+            background: var(--bg2);
+            color: var(--text);
+        }
     </style>
 </head>
 
@@ -605,6 +628,16 @@
                     <div class="bar"></div>
                     <div class="bar"></div>
                 </div>
+            </div>
+            <div class="form-group"
+                style="margin-top: -1rem; margin-bottom: 1.5rem; text-align: left; padding: 0 1rem;">
+                <span class="form-label" style="text-align: center;">Darajangizni tanlang</span>
+                <select id="level-select" class="select-field">
+                    <option value="Any">🌟 Istalgan daraja (Any Level)</option>
+                    <option value="Beginner">🟢 Boshlang'ich (Beginner)</option>
+                    <option value="Intermediate">🟡 O'rta (Intermediate)</option>
+                    <option value="Advanced">🔴 Ilg'or (Advanced)</option>
+                </select>
             </div>
             <div class="btn-group">
                 <button class="btn btn-primary" id="btn-random" onclick="startSearch()">
@@ -675,6 +708,14 @@
             <div class="form-group">
                 <span class="form-label">Komnata Kodi</span>
                 <input type="text" id="create-code" class="input-field" placeholder="Masalan: 7777" maxlength="10">
+            </div>
+            <div class="form-group">
+                <span class="form-label">Odamlar Soni (Sig'im)</span>
+                <select id="create-capacity" class="select-field">
+                    <option value="2">2 kishilik xona</option>
+                    <option value="3">3 kishilik xona</option>
+                    <option value="4">4 kishilik xona</option>
+                </select>
             </div>
             <div class="info-box">
                 <span class="info-box-icon">💡</span>
@@ -775,7 +816,8 @@
         </div>
     </div>
 
-    <audio id="remote-audio" autoplay playsinline></audio>
+    <!-- Container for dynamic audio tags -->
+    <div id="audio-container"></div>
 
     <script>
         // TELEGRAM & USER ID
@@ -819,7 +861,8 @@
 
         // GLOBALS
         let matchId = null;
-        let role = null;
+        let matchParticipants = {};
+        let peers = {}; // track remote peer connections
         let peer = null;
         let localStream = null;
         let isMuted = false;
@@ -843,11 +886,20 @@
         function enterDebate(data) {
             stopPolling();
             matchId = data.match_id;
-            role = data.role;
-            console.log('🎯 Matched!', matchId, role, data.opponent_name);
+            matchParticipants = data.participants;
+            console.log('🎯 Matched!', matchId, matchParticipants);
             showScreen('screen-active');
-            document.getElementById('status-text').innerText = `Raqib: ${data.opponent_name || 'Topildi'}! Ulanmoqda...`;
+            updateStatusText();
             initLiveDebate();
+        }
+
+        function updateStatusText() {
+            const others = Object.values(matchParticipants).filter(p => p.peer_id !== `tc_${matchId}_${userId}`).map(p => p.name);
+            if (others.length > 0) {
+                document.getElementById('status-text').innerText = `Xonada: ${others.join(', ')} ... Ulanmoqda...`;
+            } else {
+                document.getElementById('status-text').innerText = `Raqib kutilmoqda...`;
+            }
         }
 
         // RANDOM SEARCH
@@ -856,7 +908,9 @@
             const el = document.getElementById('search-status');
             el.innerText = "Serverga ulanmoqda...";
 
-            const res = await api('/api/search', { name: getUserName() });
+            const level = document.getElementById('level-select').value;
+
+            const res = await api('/api/search', { name: getUserName(), level: level });
             console.log('🔍 Search:', res);
 
             if (res.status === 'matched') {
@@ -898,16 +952,17 @@
         async function handleCreateRoom() {
             const name = document.getElementById('create-name').value.trim();
             const code = document.getElementById('create-code').value.trim();
+            const capacity = document.getElementById('create-capacity').value;
             if (!name) { showAlert("Ismingizni kiriting!"); return; }
             if (!code) { showAlert("Komnata kodini kiriting!"); return; }
 
-            const res = await api('/api/create-room', { name, code });
+            const res = await api('/api/create-room', { name, code, capacity: parseInt(capacity) });
             console.log('🏠 Create room:', res);
 
             if (res.status === 'ok') {
                 activeRoomCode = code;
                 document.getElementById('waiting-room-code').innerText = code;
-                document.getElementById('waiting-room-name').innerText = `1/2 — Salom, ${name}! Raqib kutilmoqda...`;
+                document.getElementById('waiting-room-name').innerText = `1/${capacity} — Salom, ${name}! Raqib kutilmoqda...`;
                 showScreen('screen-waiting-room');
 
                 pollTimer = setInterval(async () => {
@@ -975,10 +1030,10 @@
 
         function setupPeer() {
             const statusText = document.getElementById('status-text');
-            const peerId = `tc_${matchId}_${role}`;
-            console.log('🔗 Peer ID:', peerId);
+            const myPeerId = `tc_${matchId}_${userId}`;
+            console.log('🔗 Peer ID:', myPeerId);
 
-            peer = new Peer(peerId, {
+            peer = new Peer(myPeerId, {
                 debug: 0,
                 config: {
                     iceServers: [
@@ -992,67 +1047,84 @@
 
             peer.on('open', () => {
                 console.log('✅ Peer connected');
-                if (role === 'B') tryCall(0);
-                else statusText.innerText = "Raqibning ulanishi kutilmoqda...";
+                document.getElementById('live-badge').classList.add('show');
+                startTimer();
+
+                checkAndCallPeers(matchParticipants);
+
+                pollTimer = setInterval(async () => {
+                    const check = await api('/api/check-match');
+                    if (check.status === 'matched') {
+                        matchParticipants = check.participants;
+                        updateStatusText();
+                        checkAndCallPeers(matchParticipants);
+                    }
+                }, 3000);
             });
 
             peer.on('call', (call) => {
-                console.log('📞 Incoming call!');
+                console.log('📞 Incoming call from', call.peer);
                 call.answer(localStream);
-                handleCall(call);
+                handleCall(call, call.peer);
             });
 
             peer.on('error', (err) => {
-                console.warn('PeerJS:', err.type);
-                if (err.type === 'peer-unavailable' && role === 'B') {
-                    // tryCall handles retries
-                } else if (err.type === 'unavailable-id') {
+                console.warn('PeerJS:', err.type, err);
+                if (err.type === 'unavailable-id') {
                     statusText.innerText = "Sessiya allaqachon ochiq. Sahifani yangilang.";
                     statusText.classList.add('error');
                 }
             });
         }
 
-        function tryCall(attempt) {
-            const statusText = document.getElementById('status-text');
-            const liveBadge = document.getElementById('live-badge');
+        function checkAndCallPeers(participants) {
+            for (let uid in participants) {
+                if (uid === userId) continue;
+                const targetPeerId = participants[uid].peer_id;
 
-            if (attempt > 25) {
-                statusText.innerText = "Raqib ulanmadi. Qayta urinib ko'ring.";
-                statusText.classList.add('error');
-                return;
-            }
-
-            statusText.innerText = `Raqibga ulanmoqda... (${attempt + 1})`;
-            const targetId = `tc_${matchId}_A`;
-            const call = peer.call(targetId, localStream);
-
-            if (call) {
-                handleCall(call);
-                setTimeout(() => {
-                    if (!liveBadge.classList.contains('show')) tryCall(attempt + 1);
-                }, 3000);
+                if (!peers[targetPeerId]) {
+                    // String comparison works perfectly globally to establish 1 caller
+                    if (userId < uid) {
+                        console.log('📞 Calling new peer:', targetPeerId);
+                        const call = peer.call(targetPeerId, localStream);
+                        if (call) {
+                            peers[targetPeerId] = true;
+                            handleCall(call, targetPeerId);
+                        }
+                    } else {
+                        // Kichik IDli user meni call qilishini kutaman
+                    }
+                }
             }
         }
 
-        function handleCall(call) {
+        function handleCall(call, targetPeerId) {
+            peers[targetPeerId] = true;
             const statusText = document.getElementById('status-text');
-            const liveBadge = document.getElementById('live-badge');
-            const remoteAudio = document.getElementById('remote-audio');
 
             call.on('stream', (stream) => {
-                console.log('🎵 Remote stream received');
-                remoteAudio.srcObject = stream;
-                statusText.innerText = "🎙️ Debat boshlandi!";
-                liveBadge.classList.add('show');
-                startTimer();
+                console.log('🎵 Remote stream received from', targetPeerId);
 
-                // Ovoz muammosini yechaish uchun: iOS va ba'zi maxsus brauzerlarda avtomatik play bloklanadi
+                let audioId = `audio_${targetPeerId}`;
+                let audioElement = document.getElementById(audioId);
+
+                if (!audioElement) {
+                    audioElement = document.createElement('audio');
+                    audioElement.id = audioId;
+                    audioElement.autoplay = true;
+                    audioElement.playsInline = true;
+                    document.getElementById('audio-container').appendChild(audioElement);
+                }
+
+                audioElement.srcObject = stream;
+                statusText.innerText = "🎙️ Debat Qizig'ida!";
+
+                // Maxsus autoplay errorini oldini olish
                 try {
-                    let playPromise = remoteAudio.play();
+                    let playPromise = audioElement.play();
                     if (playPromise !== undefined) {
                         playPromise.catch(error => {
-                            console.warn("Avto-play bloklandi, foydalanuvchi ekranni bosishi kutilyapti:", error);
+                            console.warn("Avto-play bloklandi. Xavotir olmang. UI orqali qayergadir bosilganda ishlab ketishi mumkin.", error);
                         });
                     }
                 } catch (e) {
@@ -1061,14 +1133,15 @@
             });
 
             call.on('close', () => {
-                console.log('📞 Call ended');
-                endDebate();
+                console.log('📞 Call ended with', targetPeerId);
+                let audioElement = document.getElementById(`audio_${targetPeerId}`);
+                if (audioElement) audioElement.remove();
+                delete peers[targetPeerId];
             });
 
             call.on('error', (err) => {
                 console.error('📞 Call error:', err);
-                statusText.innerText = "❌ Ulanish xatosi!";
-                statusText.classList.add('error');
+                delete peers[targetPeerId];
             });
         }
 
@@ -1113,13 +1186,17 @@
             document.getElementById('mute-text').innerText = isMuted ? 'Unmute' : 'Mute';
         }
 
-        function endDebate() {
+        async function endDebate() {
+            stopPolling();
             if (debateTimer) clearInterval(debateTimer);
             if (peer) peer.destroy();
             if (localStream) localStream.getTracks().forEach(track => track.stop());
 
+            await api('/api/leave');
+
             matchId = null;
-            role = null;
+            matchParticipants = {};
+            peers = {};
             peer = null;
             localStream = null;
             isMuted = false;
@@ -1128,7 +1205,7 @@
             document.getElementById('controls').classList.remove('show');
             document.getElementById('live-badge').classList.remove('show');
             document.getElementById('timer-display').innerText = '00:00';
-            document.getElementById('remote-audio').srcObject = null;
+            document.getElementById('audio-container').innerHTML = '';
 
             showScreen('screen-main');
             document.getElementById('status-text-main').innerText = "Quyidagi usuldan birini tanlang";
