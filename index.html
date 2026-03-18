@@ -579,15 +579,6 @@
             color: var(--danger);
         }
 
-        #audio-container {
-            position: absolute;
-            width: 0;
-            height: 0;
-            opacity: 0;
-            overflow: hidden;
-            pointer-events: none;
-        }
-
         .select-field {
             width: 100%;
             background: var(--glass);
@@ -1121,18 +1112,27 @@
                     audioElement.id = audioId;
                     audioElement.autoplay = true;
                     audioElement.playsInline = true;
-                    document.getElementById('audio-container').appendChild(audioElement);
+                    document.body.appendChild(audioElement);
                 }
 
                 audioElement.srcObject = stream;
-                statusText.innerText = "🎙️ Debat Qizig'ida!";
+                statusText.innerText = "🎙️ Debat Qizig'ida! (Gapiring)";
 
                 // Maxsus autoplay errorini oldini olish
                 try {
                     let playPromise = audioElement.play();
                     if (playPromise !== undefined) {
                         playPromise.catch(error => {
-                            console.warn("Avto-play bloklandi. Xavotir olmang. UI orqali qayergadir bosilganda ishlab ketishi mumkin.", error);
+                            console.warn("Avto-play bloklandi", error);
+                            statusText.innerHTML = "🔇 Ovoz bloklandi! <br><b>👉 ESHITISH UCHUN SHU YERNI BOSING 👈</b>";
+                            statusText.style.cursor = "pointer";
+                            statusText.style.color = "var(--accent)";
+                            statusText.onclick = () => {
+                                audioElement.play();
+                                statusText.innerText = "🎙️ Ovoz yoqildi! (Gapiring)";
+                                statusText.style.color = "var(--success)";
+                                statusText.onclick = null;
+                            };
                         });
                     }
                 } catch (e) {
