@@ -812,8 +812,11 @@
         </div>
     </div>
 
-    <!-- Container for dynamic audio tags -->
-    <div id="audio-container"></div>
+    <!-- Static audio slots (mobil autoplay uchun oldindan qo'yilgan) -->
+    <audio id="audio-slot-0" autoplay playsinline style="position:fixed;width:0;height:0;opacity:0.001"></audio>
+    <audio id="audio-slot-1" autoplay playsinline style="position:fixed;width:0;height:0;opacity:0.001"></audio>
+    <audio id="audio-slot-2" autoplay playsinline style="position:fixed;width:0;height:0;opacity:0.001"></audio>
+    <audio id="audio-slot-3" autoplay playsinline style="position:fixed;width:0;height:0;opacity:0.001"></audio>
 
     <script>
         // TELEGRAM & USER ID
@@ -870,6 +873,7 @@
         let pollTimer = null;
         let debateSeconds = 0;
         let debateTimer = null;
+        let usedAudioSlots = 0;
 
         // NAVIGATION
         function showScreen(id) {
@@ -1104,46 +1108,35 @@
             call.on('stream', (stream) => {
                 console.log('🎵 Remote stream received from', targetPeerId);
 
-                let audioId = `audio_${targetPeerId}`;
-                let audioElement = document.getElementById(audioId);
-
-                if (!audioElement) {
-                    audioElement = document.createElement('audio');
-                    audioElement.id = audioId;
-                    audioElement.autoplay = true;
-                    audioElement.playsInline = true;
-                    document.body.appendChild(audioElement);
-                }
+                // Static audio slot ishlatamiz (mobil autoplay uchun)
+                const slotId = `audio-slot-${usedAudioSlots % 4}`;
+                const audioElement = document.getElementById(slotId);
+                usedAudioSlots++;
 
                 audioElement.srcObject = stream;
                 statusText.innerText = "🎙️ Debat Qizig'ida! (Gapiring)";
 
-                // Maxsus autoplay errorini oldini olish
-                try {
-                    let playPromise = audioElement.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(error => {
-                            console.warn("Avto-play bloklandi", error);
-                            statusText.innerHTML = "🔇 Ovoz bloklandi! <br><b>👉 ESHITISH UCHUN SHU YERNI BOSING 👈</b>";
-                            statusText.style.cursor = "pointer";
-                            statusText.style.color = "var(--accent)";
-                            statusText.onclick = () => {
-                                audioElement.play();
-                                statusText.innerText = "🎙️ Ovoz yoqildi! (Gapiring)";
-                                statusText.style.color = "var(--success)";
-                                statusText.onclick = null;
-                            };
-                        });
-                    }
-                } catch (e) {
-                    console.error("Play error:", e);
-                }
+                const tryPlay = () => {
+                    const p = audioElement.play();
+                    if (p) p.catch(err => {
+                        console.warn("Avto-play bloklandi, foydalanuvchi harakat kutilmoqda", err);
+                        statusText.innerHTML = "🔇 <b>OVOZ UCHUN BU YERGA BOSING</b>";
+                        statusText.style.cursor = "pointer";
+                        statusText.style.color = "var(--accent)";
+                        statusText.onclick = () => {
+                            audioElement.play();
+                            statusText.innerText = "🎙️ Ovoz yoqildi! Gapiring...";
+                            statusText.style.color = "";
+                            statusText.style.cursor = "";
+                            statusText.onclick = null;
+                        };
+                    });
+                };
+                tryPlay();
             });
 
             call.on('close', () => {
                 console.log('📞 Call ended with', targetPeerId);
-                let audioElement = document.getElementById(`audio_${targetPeerId}`);
-                if (audioElement) audioElement.remove();
                 delete peers[targetPeerId];
             });
 
@@ -1209,11 +1202,16 @@
             localStream = null;
             isMuted = false;
             debateSeconds = 0;
+            usedAudioSlots = 0;
 
             document.getElementById('controls').classList.remove('show');
             document.getElementById('live-badge').classList.remove('show');
             document.getElementById('timer-display').innerText = '00:00';
-            document.getElementById('audio-container').innerHTML = '';
+
+            for (let i = 0; i < 5; i++) {
+                let a = document.getElementById(`audio-slot-${i}`);
+                if (a) a.srcObject = null;
+            }
 
             showScreen('screen-main');
             document.getElementById('status-text-main').innerText = "Quyidagi usuldan birini tanlang";
