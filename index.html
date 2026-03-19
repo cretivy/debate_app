@@ -1031,13 +1031,50 @@
             }
         }
 
+        function getSignalingConfig() {
+            // API URL dan signaling server config olamiz
+            const params = new URLSearchParams(window.location.search);
+            const apiOverride = params.get('api');
+            const base = apiOverride ? apiOverride.replace(/\/$/, '') : window.location.origin;
+
+            try {
+                const url = new URL(base);
+                return {
+                    host: url.hostname,
+                    // Port: 443 yoki 80 default, yoki URL dagi port
+                    port: url.port ? parseInt(url.port) : (url.protocol === 'https:' ? 443 : 80),
+                    // path='/' => PeerJS connects to /peerjs (appends key by default)
+                    path: '/',
+                    secure: url.protocol === 'https:',
+                    key: 'peerjs'
+                };
+            } catch (e) {
+                // Fallback localhost
+                return {
+                    host: 'localhost',
+                    port: 8080,
+                    path: '/',
+                    secure: false,
+                    key: 'peerjs'
+                };
+            }
+        }
+
         function setupPeer() {
             const statusText = document.getElementById('status-text');
             const myPeerId = `tc_${matchId}_${userId}`;
+            const sigConfig = getSignalingConfig();
             console.log('🔗 Peer ID:', myPeerId);
+            console.log('🔗 Signaling config:', sigConfig);
 
+            // Custom WebSocket signaling server
             peer = new Peer(myPeerId, {
-                debug: 0,
+                debug: 1,
+                host: sigConfig.host,
+                port: sigConfig.port,
+                path: sigConfig.path,
+                secure: sigConfig.secure,
+                key: sigConfig.key,
                 config: {
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
