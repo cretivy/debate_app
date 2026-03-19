@@ -813,10 +813,10 @@
     </div>
 
     <!-- Static audio slots (mobil autoplay uchun oldindan qo'yilgan) -->
-    <audio id="audio-slot-0" autoplay playsinline style="position:fixed;width:0;height:0;opacity:0.001"></audio>
-    <audio id="audio-slot-1" autoplay playsinline style="position:fixed;width:0;height:0;opacity:0.001"></audio>
-    <audio id="audio-slot-2" autoplay playsinline style="position:fixed;width:0;height:0;opacity:0.001"></audio>
-    <audio id="audio-slot-3" autoplay playsinline style="position:fixed;width:0;height:0;opacity:0.001"></audio>
+    <audio id="audio-slot-0" autoplay playsinline></audio>
+    <audio id="audio-slot-1" autoplay playsinline></audio>
+    <audio id="audio-slot-2" autoplay playsinline></audio>
+    <audio id="audio-slot-3" autoplay playsinline></audio>
 
     <script>
         // TELEGRAM & USER ID
@@ -1080,7 +1080,10 @@
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
                         { urls: 'stun:stun2.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' }
+                        { urls: 'stun:global.stun.twilio.com:3478' },
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
                     ]
                 }
             });
